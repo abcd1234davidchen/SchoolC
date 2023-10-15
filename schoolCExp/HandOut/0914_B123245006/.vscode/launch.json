@@ -1,0 +1,13 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "C/C++ Runner: Debug Session",
+      "type": "lldb",
+      "request": "launch",
+      "args": [],
+      "cwd": "/Users/davidchen/Code/school/schoolCExp/HandOut/0914_B123245006",
+      "program": "/Users/davidchen/Code/school/schoolCExp/HandOut/0914_B123245006/build/Debug/outDebug"
+    }
+  ]
+}
