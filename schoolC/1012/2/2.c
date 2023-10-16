@@ -1,18 +1,17 @@
 #include<stdio.h>
-#include<math.h>
 int main(void){
-    int in,rev=0,p=-1,power=1,temp,ogin,ogrev;
+    int in,rev=0,temp,ogin,ogrev;
     printf("Enter an interger: ");
     scanf("%d",&in);
+    temp = in;
     //reverse number
-    while (in/power>10){
-        rev*=10;
-        p+=1;
-        power=(int)pow(10,p);
-        rev+=in/power%10;
+    while (in!=0){
+        rev=rev*10+in%10;
+        in/=10;
     }
     ogrev = rev;
-    ogin = in;
+    in = temp;
+    ogin = temp;
     printf("Reversed number: %d\n",ogrev);
     //GCD
     if (rev>in){//in >= rev
