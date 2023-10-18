@@ -25,4 +25,5 @@ int main(void){
         in = temp;
     }
     printf("GCD of %d and %d is %d",ogin,ogrev,rev);
+    //weee
 }
