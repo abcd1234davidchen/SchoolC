@@ -1,19 +1,6 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<time.h>
-void hw1(void){
-    int in,first,last,count=0;
-    printf("Enter the value of n: ");
-    scanf("%d",&in);
-    printf("Side length of triangle:\n");
-    for (first=0;first<in;first++){
-        for(last=in+1;last<(first+in);last++){
-            printf("%d %d %d\n",first,in,last);
-            count+=1;
-        }
-    }    
-    printf("Number of triangle with n as the middle side length: %d\n",count);
-}
 void hw2(void){
     int a[3][3],b[3][3],add[3][3],sub[3][3];
     printf("a.\n");
@@ -67,7 +54,5 @@ void hw2(void){
 }
 int main(void){
     srand(time(NULL));
-    hw1();
-    printf("\n");
     hw2();
 }
