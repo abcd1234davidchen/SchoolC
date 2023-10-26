@@ -8,7 +8,7 @@ int main(void){
     srand(time(NULL));
     for (int i=0;i<4;i++){
         x[i]=rand()%10;
-        for (int j = 0; j < i; j++){
+        for (int j=0;j<i;j++){
             while(x[i]==x[j]){
                 x[i]=rand()%10;
             }

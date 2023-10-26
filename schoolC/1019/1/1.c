@@ -3,7 +3,7 @@ int main(void){
     int min,max,temp,flag,add,pof,p10;
     printf("Please input a range[i,j]: ");
     while (scanf("%d %d",&min,&max)!=EOF){
-        if(min>=10&&max<=200000&&max>=min){
+        if(min>=10&&max<=10000000&&max>=min){
             add=0;
             for(int i=min+1;i<=max;i++){
                 pof=1;
