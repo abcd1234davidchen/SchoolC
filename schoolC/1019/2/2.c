@@ -13,6 +13,9 @@ int main(void){
                 printf("0 is not the power of any number, input again.\n");
             }
         }
+        else if(b==1||b==0){
+            printf("%d is not the power of %d\n",a,b);
+        }
         else{
             oa=a;
             while (a>=b){
