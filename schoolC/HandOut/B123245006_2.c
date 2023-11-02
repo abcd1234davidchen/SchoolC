@@ -1,28 +1,37 @@
 #include<stdio.h>
 int main(void){
-    int in,rev=0,temp,ogin,ogrev;
-    printf("Enter an interger: ");
-    scanf("%d",&in);
-    temp = in;
-    //reverse number
-    while (in!=0){
-        rev=rev*10+in%10;
-        in/=10;
+    int a,b,p,pow,oa;
+    printf("Please input a pair of interger (m,n): ");
+    while(scanf("%d %d",&a,&b)!=EOF){
+        p=0;
+        pow=1;
+        if(a==0){
+            if(b==0){
+                printf("Wrong input, input again!\n");
+            }
+            else{
+                printf("0 is not the power of any number, input again.\n");
+            }
+        }
+        else if(b==1||b==0){
+            printf("%d is not the power of %d\n",a,b);
+        }
+        else{
+            oa=a;
+            while (a>=b){
+                a/=b;
+                p+=1;
+            }
+            for(int i=0;i<p;i++){
+                pow*=b;
+            }
+            if(oa==pow){
+                printf("%d is the power of %d\n",oa,b);
+            }
+            else{
+                printf("%d is not the power of %d\n",oa,b);
+            }
+        }
+        printf("Please input a pair of interger (m,n): ");
     }
-    ogrev = rev;
-    in = temp;
-    ogin = temp;
-    printf("Reversed number: %d\n",ogrev);
-    //GCD
-    if (rev>in){//in >= rev
-        temp = rev;
-        rev = in;
-        in = temp;
-    }
-    while (in%rev!=0){
-        temp = rev;
-        rev = in%rev;
-        in = temp;
-    }
-    printf("GCD of %d and %d is %d",ogin,ogrev,rev);
 }

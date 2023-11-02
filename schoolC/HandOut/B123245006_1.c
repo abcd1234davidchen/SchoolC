@@ -1,57 +1,47 @@
-#include<stdio.h>
-#include<stdlib.h>
-#include<time.h>
+#include <stdio.h>
 int main(void){
-    int x[5],in,ans[5],a=0,b=0;
-
-    //random number
-    srand(time(NULL));
-    for (int i=0;i<4;i++){
-        x[i]=rand()%10;
-        for (int j = 0; j < i; j++){
-            while(x[i]==x[j]){
-                x[i]=rand()%10;
-            }
-        }
-    }
-
-    for (int h = 0; h < 10; h++) {
-        //split
-        printf("input four different number:(例如2178): ");
-        scanf("%d",&in);
-        ans[0]=in/1000;
-        ans[1]=in/100%10;
-        ans[2]=in/10%10;
-        ans[3]=in%10;
-
-        //compare
-        for (int i=0;i<4;i++){
-            for (int j=0;j<4;j++){
-                if (ans[i]==x[j]){
-                    b+=1;
-                    if(i==j){
-                        a+=1;
-                        b-=1;
+    int min,max,temp,flag,add,pof,p10;
+    printf("Please input a range[i,j]: ");
+    while (scanf("%d %d",&min,&max)!=EOF){
+        if(min>=10&&max<=200000&&max>=min){
+            add=0;
+            for(int i=min+1;i<=max;i++){
+                pof=1;
+                p10=1;
+                temp=i;
+                while (temp>10){
+                    temp/=10;
+                    pof+=1;
+                    p10*=10;
+                }
+                flag=0;
+                temp=i;
+                for(int j=0;j<pof;j++){//rotate
+                    for(int m=2;m*m<temp;m++){//prime
+                        if (temp%m==0){
+                        flag=1;
+                        break;
+                        }
                     }
+                    if(flag==1){
+                        break;
+                    }
+                    temp = temp/10+temp%10*p10;
+                }
+                if(flag==0){
+                    //printf("%d ",i);
+                    add+=1;
                 }
             }
-        }
-        printf("結果： %dA%dB,還有%d次機會...\n",a,b,9-h);
-
-        //break
-        if (a==4){
-            h=100;
+            if (add==0){
+                printf("no Circular prime\nPlease input a range[i,j]: ");
+            }
+            else{
+                printf("%d Circular prime\nPlease input a range[i,j]: ",add);
+            }
         }
         else{
-            a=0;
-            b=0;
+            printf("Invalid input\nPlease input a range[i,j]: ");
         }
     }
-    if (a==4){
-        printf("您猜對了");
-    }
-    else{
-        printf("答案是%d%d%d%d",x[0],x[1],x[2],x[3]);
-    }
-    
 }
