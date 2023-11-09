@@ -35,7 +35,7 @@ int main(void){
     }
     printf("\n");
 
-//    print sort
+//    print frequency
     for(int i=0;i<10;i++){
         for(int j=0;j<5;j++){
             temp=i*5+j+1;
