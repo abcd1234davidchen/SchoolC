@@ -6,21 +6,8 @@
       "type": "lldb",
       "request": "launch",
       "args": [],
-      "cwd": "/Users/davidchen/Code/school/schoolC/Test/test4",
-      "program": "/Users/davidchen/Code/school/schoolC/Test/test4/build/Debug/outDebug"
-    },
-    {
-      "name": "C/C++: gcc 建置及偵錯使用中的檔案",
-      "type": "cppdbg",
-      "request": "launch",
-      "program": "${fileDirname}/${fileBasenameNoExtension}",
-      "args": [],
-      "stopAtEntry": false,
-      "cwd": "${fileDirname}",
-      "environment": [],
-      "externalConsole": false,
-      "MIMode": "lldb",
-      "preLaunchTask": "C/C++: gcc 建置使用中檔案"
+      "cwd": "/Users/davidchen/Code/school/schoolC/Test/test5",
+      "program": "/Users/davidchen/Code/school/schoolC/Test/test5/build/Debug/outDebug"
     }
   ]
 }
