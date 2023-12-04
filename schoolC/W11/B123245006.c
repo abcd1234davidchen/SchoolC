@@ -4,7 +4,7 @@
 #include<ctype.h>
 void HW01(void){
     FILE *inFile=fopen("11-1input.txt","r");
-    FILE *outFile=fopen("11-1output.txt","w");
+    FILE *outFile=fopen("11_1_result.txt","w");
     int length=0,n=0,min;
     char str[256];
     while (fscanf(inFile,"%s",str)!=EOF && n<1000){
@@ -62,7 +62,7 @@ void HW02(void){
                     break;
             }
         }
-        printf("Time %2d:",times);
+        printf("Time %2d: ",times);
         if(pos[0]==0&&pos[1]==0){
             printf("TRUE\n");
         }
