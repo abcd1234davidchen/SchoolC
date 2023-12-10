@@ -94,7 +94,7 @@ void relu(void){
 }
 
 int main(void){
-    srand(time(NULL));
+    srand(5);
 
     generate();
     convolutional();
