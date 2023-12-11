@@ -7,11 +7,10 @@ int GCD(int a, int b){
     if(b==0) return a;
     else return(GCD(b,a%b));
 }
-//as a test of the GCD function
+//Weeee
 int main(void){
     int a,b;
-    while (1){
-        scanf("%d %d",&a,&b);
+    while (scanf("%d %d",&a,&b)!=EOF){
         printf("GCD%d\n",GCD(a,b));
     }    
 }
