@@ -17,13 +17,14 @@ int main(void){
             continue;
         }
         int n=1,arr[100],i=0;
-        while (input>fib(n)){
+        while (input>=fib(n)){
             n++;
         }
         n-=1;
         //printf("%d\n",n);
-        while(n>2){
-            //printf("INPUT %d %d\n",input,fib(n));
+        while(n>1){
+            printf("INPUT %d %d\n",input,fib(n));
+            printf("%d \n",n);
             if(input>=fib(n)){
                 arr[i]=input/fib(n);
                 input=input%fib(n);
@@ -33,7 +34,6 @@ int main(void){
             }
             n--;
             i++;
-            printf("%d \n",n);
         }
         for(int j=0;j<i;j++){
             printf("%d",arr[j]);
