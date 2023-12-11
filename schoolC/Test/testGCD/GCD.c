@@ -4,8 +4,8 @@
 
 int GCD(int a, int b){
     if(b>a) b=(a+b)-(a=b);
-    if(b%a==0) return b;
-    else return(GCD(b,b%a));
+    if(b==0) return a;
+    else return(GCD(b,a%b));
 }
 //as a test of the GCD function
 int main(void){
