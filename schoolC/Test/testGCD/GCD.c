@@ -11,5 +11,6 @@ int main(void){
     int a,b;
     while (scanf("%d %d",&a,&b)!=EOF){
         printf("GCD%d\n",GCD(a,b));
+        printf("LCM%d\n",a*b/GCD(a,b));
     }    
 }

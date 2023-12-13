@@ -1,31 +1,34 @@
-#include <stdio.h>
-#include <string.h>
+#include<stdio.h>
+#include<stdlib.h>
+#include<string.h>
 
-int main() {
-    char input[100];
-    while (1) {
-        printf("Enter a string (or '0' to quit): ");
-        fgets(input, sizeof(input), stdin);
-
-        if (input[0] == '0' || feof(stdin)) {
-            break;
+int main(void){
+    char str[100];
+    char* start[5];
+    char* end[5];
+    int i=0,length,j=0;
+    while(fgets(str,100,stdin)!=NULL){
+        i=0;
+        j=0;
+        length=strlen(str);
+        while(i<length){
+            while(str[i]!='\"'){
+                i++;
+            }
+            start[j]=&str[i+1];
+            i++;
+            while(str[i]!='\"'){
+                i++;
+            }
+            end[j]=&str[i];
+            i+=2;
+            j++;
         }
-
-        char* start = strchr(input, '\"');
-        char* end = strrchr(input, '\"');
-        while (start != NULL && end != NULL && start != end) {
-            start++;
-            *end = '\0';
-            printf("%s\n", start);
-
-            start = strchr(end + 1, '\"');
-            end = strrchr(end + 1, '\"');
-        }
-
-        if (start == NULL || end == NULL) {
-            printf("No text within double quotes found.\n");
+        for(int m=j;m>=0;m--){
+            while (start[m]+i!=end[m]){
+                printf("%c",start[m][i]);
+                i++;
+            }
         }
     }
-
-    return 0;
 }
