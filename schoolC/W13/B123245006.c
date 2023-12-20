@@ -150,6 +150,7 @@ int main(void) {
             printf("\n");
         }
     }
+    fclose(sorted);
     printf("Enter a number to search: ");
     while (scanf("%d",&key)!=EOF)
     {
@@ -164,4 +165,5 @@ int main(void) {
     }
     char hArr[1024];
     while(fgets(hArr,1024,hello)!=NULL) printf("%s",hArr);
+    fclose(hello);
 }
