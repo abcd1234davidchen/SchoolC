@@ -6,8 +6,8 @@
       "type": "lldb",
       "request": "launch",
       "args": [],
-      "cwd": "/Users/davidchen/Code/school/schoolCExp/W14/3",
-      "program": "/Users/davidchen/Code/school/schoolCExp/W14/3/build/Debug/outDebug"
+      "cwd": "/Users/davidchen/Code/school/schoolCExp/W14/1",
+      "program": "/Users/davidchen/Code/school/schoolCExp/W14/1/build/Debug/outDebug"
     }
   ]
 }

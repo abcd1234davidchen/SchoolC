@@ -6,8 +6,8 @@
       "type": "lldb",
       "request": "launch",
       "args": [],
-      "cwd": "/Users/davidchen/Code/school/schoolC/Test/testHanoi",
-      "program": "/Users/davidchen/Code/school/schoolC/Test/testHanoi/build/Debug/outDebug"
+      "cwd": "/Users/davidchen/Code/school/schoolC/Test/testSortFunc",
+      "program": "/Users/davidchen/Code/school/schoolC/Test/testSortFunc/build/Debug/outDebug"
     }
   ]
 }
