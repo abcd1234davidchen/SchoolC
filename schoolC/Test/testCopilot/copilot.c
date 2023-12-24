@@ -1,20 +1,13 @@
-
 #include <stdio.h>
 
+unsigned int swap_bytes(unsigned int x) {
+    return ((x & 0xFF00FF00) >> 8) | ((x & 0x00FF00FF) << 8);
+}
+
 int main() {
-    int bun = 1;
-
-    switch (bun) {
-        case 1:
-            printf("Purchase 黑糖包\n");
-            break;
-        case 2:
-            printf("Purchase 爆漿包\n");
-            break;
-        default:
-            printf("算了\n");
-            break;
-    }
-
+    unsigned int x;
+    printf("請輸入一個無符號整數: ");
+    scanf("%u", &x);
+    printf("交換第二和第三個位元組後的結果為: %u\n", swap_bytes(x));
     return 0;
 }
