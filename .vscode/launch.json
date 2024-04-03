@@ -3,22 +3,11 @@
   "configurations": [
     {
       "name": "C/C++ Runner: Debug Session",
-      "type": "cppdbg",
+      "type": "lldb",
       "request": "launch",
       "args": [],
-      "stopAtEntry": false,
-      "externalConsole": false,
-      "cwd": "/workspaces/SchoolC/schoolC/Test/testCopilot",
-      "program": "/workspaces/SchoolC/schoolC/Test/testCopilot/build/Debug/outDebug",
-      "MIMode": "lldb",
-      "miDebuggerPath": "lldb",
-      "setupCommands": [
-        {
-          "description": "Enable pretty-printing for gdb",
-          "text": "-enable-pretty-printing",
-          "ignoreFailures": true
-        }
-      ]
+      "cwd": "/Users/davidchen/Code/school/schoolCpp/chapter1/n3",
+      "program": "/Users/davidchen/Code/school/schoolCpp/chapter1/n3/build/Debug/outDebug"
     }
   ]
 }
