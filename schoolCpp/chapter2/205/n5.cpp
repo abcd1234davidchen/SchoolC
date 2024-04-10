@@ -9,7 +9,7 @@ int main(){
                     if(4*(100*t+10*o+o)==1000*g+100*o+10*o+d){
                         if(t!=o&&t!=g&&t!=d){
                             if(o!=g&&o!=d&&g!=d){
-                                cout<<"t"<<t<<"o"<<o<<"g"<<g<<"d"<<d<<endl;
+                                cout<<"t "<<t<<" o "<<o<<" g "<<g<<" d "<<d<<endl;
                             }
                         }
                     }
