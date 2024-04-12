@@ -2,7 +2,7 @@
 using namespace std;
 
 int dice(){
-    return rand()%5+1;
+    return rand()%6+1;
 }
 
 int humanTurn(int humanTotalScore){
@@ -74,7 +74,7 @@ int main(){
     bool manWin;
     while(1){
         cout<<"MAN TURN"<<endl;
-        man=autoHuman(man);
+        man=humanTurn(man);
         cout<<man<<endl;
         if(man>100){
             manWin=true;
