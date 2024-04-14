@@ -1,0 +1,10 @@
+Ronaldo
+1000
+Bob
+800
+Peter
+100
+Paul
+1200
+Dieder
+1040

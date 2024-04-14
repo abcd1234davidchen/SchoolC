@@ -122,7 +122,7 @@ int main(){
     while(1){
         generation(table);
         render(table);
-        sleep(2);
+        usleep(500*1000);
         cout<<"--------"<<endl;
     }
 }
