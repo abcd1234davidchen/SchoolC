@@ -19,7 +19,9 @@ void point::set(int iX,int iY){
 }
 
 void point::move(){
-    cin>>x>>y;
+    int a,b;
+    cin>>a>>b;
+    x+=a;y+=b;
 }
 
 void point::rotate(){

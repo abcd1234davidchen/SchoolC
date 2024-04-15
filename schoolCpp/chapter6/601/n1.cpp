@@ -10,7 +10,7 @@ struct employees{
 };
 
 void totalScore(employees& guy){
-    guy.score=guy.C*1.0*0.5+guy.P*1.0*0.3+guy.I*1.0*0.2;
+    guy.score=guy.C*1.0*5+guy.P*1.0*+guy.I*1.0*2;
 }
 
 void rate(employees& guy){
