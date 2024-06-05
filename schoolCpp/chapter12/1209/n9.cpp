@@ -15,7 +15,7 @@ int main() {
     int mileage1, mileage2, mileage3;
 
     while (inputFile >> make >> model >> mileage1 >> mileage2 >> mileage3) {
-        outputFile <<setw(7)<< make << " " <<setw(7)<<model << " "<<setw(4) << mileage1 << " " <<setw(4)<<mileage2<< " " <<setw(4) << mileage3<<" ";
+        outputFile <<left<<setw(10)<< make << " " <<setw(10)<<model << " "<<setw(7) << mileage1 << " " <<setw(7)<<mileage2<< " " <<setw(7) << mileage3<<" ";
         outAverageMileage(mileage1, mileage2, mileage3, outputFile);
     }
 
