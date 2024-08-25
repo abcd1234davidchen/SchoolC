@@ -108,7 +108,7 @@ void TwoD::setValue(int r,int c,int value){
     arr[r][c]=value;
 }
 
-TwoD& TwoD::operator=(const TwoD& other){
+const TwoD& TwoD::operator=(const TwoD& other){
     if(this!=&other){
         for(int i=0;i<row;i++){
             delete[] arr[i];

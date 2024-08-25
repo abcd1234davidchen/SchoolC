@@ -20,7 +20,7 @@ class TwoD{
         void setColumn(int newColumn);
         int getValue(int r,int c)const;
         void setValue(int r,int c,int value);
-        TwoD& operator=(const TwoD& other);
+        const TwoD& operator=(const TwoD& other);
         const TwoD operator+(const TwoD& other)const;
         const TwoD operator*(const TwoD& other)const;
         friend ostream& operator<<(ostream& out,const TwoD& theOne){
