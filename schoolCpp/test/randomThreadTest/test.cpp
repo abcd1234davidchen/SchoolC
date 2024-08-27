@@ -6,6 +6,9 @@ int main(){
         if(i%3==2){
             cout<<endl;
         }
+        if(i%9==8){
+            cout<<endl;
+        }
     }
 
     int a=4,b=5;
