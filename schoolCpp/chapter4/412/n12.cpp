@@ -2,13 +2,7 @@
 using namespace std;
 
 bool alive(int i){
-    int chance=rand()%i;
-    if(chance==0){
-        return false;
-    }
-    else{
-        return true;
-    }
+    return rand()%i!=0;
 }
 
 int winner(){
@@ -92,24 +86,18 @@ int missAaronWinner(){
 
 int main(){
     srand(time(0));
-    int theOne;
     int alive[3]={0};
-    for(int i=0;i<10000;i++){
-        theOne=winner()-1;
-        alive[theOne]+=1;
+    for(int i=0;i<10000000;i++){
+        alive[winner()-1]+=1;
     }
-    char winnerName[3][10]={"Aaron","Bob","Charlie"};
+    string winnerName[3]={"Aaron","Bob","Charlie"};
     for(int i=0;i<3;i++){
         cout<<winnerName[i]<<" won "<<alive[i]<<" times "<<endl;
+        alive[i]=0;
     }
-
     cout<<"change of plan"<<endl;
-    alive[0]=0;
-    alive[1]=0;
-    alive[2]=0;
-    for(int i=0;i<10000;i++){
-        theOne=missAaronWinner()-1;
-        alive[theOne]+=1;
+    for(int i=0;i<10000000;i++){
+        alive[missAaronWinner()-1]+=1;
     }
     for(int i=0;i<3;i++){
         cout<<winnerName[i]<<" won "<<alive[i]<<" times "<<endl;
