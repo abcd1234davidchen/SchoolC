@@ -14,18 +14,18 @@ void fact(int n){
                 if (vec.size()==j+1) {
                     vec.push_back(0);
                 }
-                vec[j+1] += vec[j] / 10;
-                vec[j] %= 10;
+                vec[j+1]+=vec[j]/10;
+                vec[j]%=10;
             }
         }
-        cout<<"VEC"<<i<<endl;
+        cout<<i<<"!";
         for(int j=vec.size()-1;j>=0;j--){
             cout<<vec[j];
         }
-        cout<<endl<<endl;
+        cout<<endl;
     }
 }
 
 int main(){
-    fact(6);
+    fact(50);
 }
