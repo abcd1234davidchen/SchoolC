@@ -1,9 +1,11 @@
 #include <iostream>
+#include <vector>
 using namespace std;
 
 int main(){
-    vector<int> vec = {1};
-    for(int i=0;i<10;i++){
+    vector<int> vec;
+    vec.push_back(1);
+    for(int i=1;i<10;i++){
         for(int j=0;j<vec.size();j++){
             vec[j]*=i;
         }
@@ -16,5 +18,6 @@ int main(){
         for(int j=vec.size()-1;j>=0;j--){
             cout<<vec[j];
         }
+        cout<<endl<<endl;
     }
 }
