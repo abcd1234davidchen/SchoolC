@@ -18,14 +18,23 @@ void fact(int n){
                 vec[j]%=10;
             }
         }
-        cout<<i<<"!";
-        for(int j=vec.size()-1;j>=0;j--){
-            cout<<vec[j];
+        cout<<i<<"!=";
+        for(size_t j=vec.size();j>0;j--){
+            cout<<vec[j-1];
         }
         cout<<endl;
     }
 }
 
 int main(){
-    fact(50);
+    vector<int> n;
+    int input;
+    while(cin>>input,input!=0){
+        n.push_back(input);
+    }
+    for(size_t i=0;i<n.size();i++){
+        fact(n[i]);
+        if (i!=n.size()-1)
+        cout<<endl;
+    }
 }
