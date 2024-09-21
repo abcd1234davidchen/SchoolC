@@ -3,15 +3,17 @@
 //Purpose: Create muiltiple magic square
 
 #include<iostream>
+#include<cstring>
 #include<iomanip>
 using namespace std;
 
 //function for creating square
 void arrayCreate(int k){
-    //create clean 2D array
+    //create clean 2D array and set to 0
     int **arr = new int*[k];
     for(int i=0;i<k;i++){
         arr[i] = new int[k];
+        memset(arr[i], 0, static_cast<size_t>(k) * sizeof(int)); // 初始化為 0
     }
 
     //set the middle of the top row to be 1

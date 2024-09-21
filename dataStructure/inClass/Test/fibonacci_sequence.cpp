@@ -33,7 +33,7 @@ long recursive_fib(long n)
 
 int main()
 {
-    long n = 45;
+    long n = 50;
 
     // Measuring execution time for iterative Fibonacci
     auto start_iterative = high_resolution_clock::now();
