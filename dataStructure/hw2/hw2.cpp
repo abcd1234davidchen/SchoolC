@@ -14,8 +14,7 @@ class set{
                 bool flag = true;
                 for(int j=0;j<arrLength;j++){
                     if (input[i]==arr[j]){
-                        flag = false;
-                        break;
+                        flag = false; break;
                     }
                 }
                 if (flag){
@@ -26,21 +25,14 @@ class set{
             for(int i=0;i<arrLength;i++){
                 for(int j=i;j<arrLength;j++){
                     if (arr[i]>arr[j]){
-                        char temp = arr[i];
-                        arr[i] = arr[j];
-                        arr[j] = temp;
+                        swap(arr[i],arr[j]);
                     }
                 }
             }
         }
         set operator+ (const set& other){
-            char newArr[256];
-            strcpy(newArr,arr);
-            for(int i=0;i<other.arrLength;i++){
-                newArr[arrLength+i] = other.arr[i];
-            }
-            newArr[arrLength+other.arrLength] = '\0';
-            set returnSet(newArr);
+            strcat(arr,other.arr);
+            set returnSet(arr);
             return returnSet;
         }
         set operator* (const set& other){
@@ -66,8 +58,7 @@ class set{
                 bool flag = true;
                 for(int j=0;j<other.arrLength;j++){
                     if (arr[i]==other.arr[j]){
-                        flag = false;
-                        break;
+                        flag = false; break;
                     }
                 }
                 if(flag){
@@ -80,20 +71,16 @@ class set{
             return returnSet;
         }
         bool operator>= (const set& other){
-            bool mainFlag = true;
             for(int i=0;i<other.arrLength;i++){
                 bool flag = true;
                 for(int j=0;j<arrLength;j++){
                     if(other.arr[i]==arr[j]){
-                        flag = false;
+                        flag = false; break;
                     }
                 }
-                if(flag){
-                    mainFlag = false;
-                    break;
-                }
+                if(flag) return false;
             }
-            return mainFlag;
+            return true;
         }
         bool has(const char x){
             for(int i=0;i<arrLength;i++){
@@ -101,7 +88,7 @@ class set{
             }
             return false;
         }
-        friend ostream& operator<< (ostream& os,set one){
+        friend ostream& operator<< (ostream& os,const set& one){
             os<<one.arr;
             return os;            
         }
@@ -115,9 +102,9 @@ int main(){
         char two[256]={0};
         char x;
         cin>>one>>two>>x;
-        cout<<"ONE"<<one<<endl;
         set A(one);
         set B(two);
+        cout<<"Test Case"<<i+1<<endl;
         cout<<"A:{"<<A<<"}"<<endl;
         cout<<"B:{"<<B<<"}"<<endl;
         cout<<"A+B:{"<<(A+B)<<"}"<<endl;
@@ -127,6 +114,6 @@ int main(){
         cout<<"A "<<((A>=B)?"contains":"does not contain")<<" B"<<endl;
         cout<<"B "<<((B>=A)?"contains":"does not contain")<<" A"<<endl;
         cout<<"'"<<x<<"'"<<((A.has(x))?"is":"is not")<<" in A"<<endl;
-        cout<<"'"<<x<<"'"<<((B.has(x))?"is":"is not")<<" in B"<<endl;
+        cout<<"'"<<x<<"'"<<((B.has(x))?"is":"is not")<<" in B"<<endl<<endl;
     }
 }
