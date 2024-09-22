@@ -2,95 +2,71 @@
 #include<cstring>
 using namespace std;
 
-class set{
+class TSet{
     private:
+        string name;
         char arr[256];
-        int arrLength;
     public:
-        set(char input[]){
+        TSet(string inName,char input[]){
+            name=inName;
             memset(arr,0,256);
-            arrLength = 0;
-            for(int i=0;i<256&&input[i]!='\0';i++){
-                bool flag = true;
-                for(int j=0;j<arrLength;j++){
-                    if (input[i]==arr[j]){
-                        flag = false; break;
-                    }
-                }
-                if (flag){
-                    arr[arrLength] = input[i];
-                    arrLength+=1;
-                }
-            }
-            for(int i=0;i<arrLength;i++){
-                for(int j=i;j<arrLength;j++){
-                    if (arr[i]>arr[j]){
-                        swap(arr[i],arr[j]);
-                    }
-                }
+            for(int i=0;i<256;i++){
+                if (input[i]=='1') arr[i]='1';
             }
         }
-        set operator+ (const set& other){
-            strcat(arr,other.arr);
-            set returnSet(arr);
-            return returnSet;
+        TSet(string inName){
+            name=inName;
+            memset(arr,0,256);
         }
-        set operator* (const set& other){
-            char newArr[256];
-            int newLength = 0;
-            for(int i=0;i<arrLength;i++){
-                for(int j=0;j<other.arrLength;j++){
-                    if (arr[i]==other.arr[j]){
-                        newArr[newLength] = arr[i];
-                        newLength+=1;
-                    }
-                }
+        TSet(){
+            name = "";
+            memset(arr,0,256);
+        }
+        TSet operator+ (const TSet& other){
+            char newArr[256] = {0};
+            for(int i=0;i<256;i++){
+                if (arr[i]=='1' || other.arr[i]=='1') newArr[i]='1';
             }
-            newArr[newLength] = '\0';
-            set returnSet(newArr);
-            return returnSet;
+            return TSet(name + "+" + other.name,newArr);
         }
-        set operator- (const set& other){
-            char newArr[256];
-            int newLength = 0;
-            strcpy(newArr,arr);
-            for(int i=0;i<arrLength;i++){
-                bool flag = true;
-                for(int j=0;j<other.arrLength;j++){
-                    if (arr[i]==other.arr[j]){
-                        flag = false; break;
-                    }
-                }
-                if(flag){
-                    newArr[newLength] = arr[i];
-                    newLength+=1;
-                }
+        TSet operator* (const TSet& other){
+            char newArr[256] = {0};
+            for(int i=0;i<256;i++){
+                if ((arr[i]=='1') && (other.arr[i]=='1')) newArr[i]='1';
             }
-            newArr[newLength] = '\0';
-            set returnSet(newArr);
-            return returnSet;
+            return TSet((name + "*" + other.name),newArr);
         }
-        bool operator>= (const set& other){
-            for(int i=0;i<other.arrLength;i++){
-                bool flag = true;
-                for(int j=0;j<arrLength;j++){
-                    if(other.arr[i]==arr[j]){
-                        flag = false; break;
-                    }
-                }
-                if(flag) return false;
+        TSet operator- (const TSet& other){
+            char newArr[256] = {0};
+            for(int i=0;i<256;i++){
+                if (arr[i]=='1' && other.arr[i]!='1') newArr[i]='1';
             }
-            return true;
+            return TSet(name + "-" + other.name,newArr);
         }
-        bool has(const char x){
-            for(int i=0;i<arrLength;i++){
-                if (arr[i] == x) return true;
+        string operator>= (const TSet& other){
+            for(int i=0;i<256;i++){
+                if (other.arr[i]=='1' && arr[i]!='1') return name+" does not contain "+other.name;
             }
-            return false;
+            return name+" does contain "+other.name;
         }
-        friend ostream& operator<< (ostream& os,const set& one){
-            os<<one.arr;
+        string has(const char x){
+            return "'"+string(1,x)+((arr[int(x)]=='1')? "' is in ":"' is not in ")+name;
+        }
+        friend ostream& operator<< (ostream& os,const TSet& one){
+            os<<one.name<<": {";
+            for(int i=0;i<256;i++){
+                if (one.arr[i]=='1') os<<char(i);
+            }
+            os<<"}";
             return os;            
+        }
+        friend istream& operator>> (istream& is,TSet& one){
+            string input;
+            is>>input;
+            for(size_t i=0;i<input.length();i++){
+                one.arr[int(input[i])]='1';
+            }
+            return is;
         }
 };
 
@@ -98,22 +74,23 @@ int main(){
     int times;
     cin>>times;
     for(int i=0;i<times;i++){
-        char one[256]={0};
-        char two[256]={0};
+        TSet A("A");
+        TSet B("B");
         char x;
-        cin>>one>>two>>x;
-        set A(one);
-        set B(two);
-        cout<<"Test Case"<<i+1<<endl;
-        cout<<"A:{"<<A<<"}"<<endl;
-        cout<<"B:{"<<B<<"}"<<endl;
-        cout<<"A+B:{"<<(A+B)<<"}"<<endl;
-        cout<<"A*B:{"<<(A*B)<<"}"<<endl;
-        cout<<"A-B:{"<<(A-B)<<"}"<<endl;
-        cout<<"B-A:{"<<(B-A)<<"}"<<endl;
-        cout<<"A "<<((A>=B)?"contains":"does not contain")<<" B"<<endl;
-        cout<<"B "<<((B>=A)?"contains":"does not contain")<<" A"<<endl;
-        cout<<"'"<<x<<"'"<<((A.has(x))?"is":"is not")<<" in A"<<endl;
-        cout<<"'"<<x<<"'"<<((B.has(x))?"is":"is not")<<" in B"<<endl<<endl;
+        cin>>A>>B>>x;
+        TSet C,D;
+        C=A+B;
+        D=A*B;
+        cout<<"Test Case "<<i+1<<endl;
+        cout<<A<<endl;
+        cout<<B<<endl;
+        cout<<C<<endl;
+        cout<<D<<endl;
+        cout<<(A-B)<<endl;
+        cout<<(B-A)<<endl;
+        cout<<(A>=B)<<endl;
+        cout<<(B>=A)<<endl;
+        cout<<A.has(x)<<endl;
+        cout<<B.has(x)<<endl<<endl;
     }
 }
