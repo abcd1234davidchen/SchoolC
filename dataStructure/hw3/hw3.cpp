@@ -21,10 +21,10 @@ class knight{
             top->next = nullptr;
         }
 
-        bool push(int **board,int d,int step){
+        bool push(int **board,int d,int step,int n){
             int newI = top->location[0]+directions[d][0];
             int newJ = top->location[1]+directions[d][1];
-            if (newI>=5 || newI <0 || newJ>=5 || newJ <0){
+            if (newI>=n || newI <0 || newJ>=n || newJ <0){
                 return false;
             }
             if(board[newI][newJ] == 0){
@@ -53,9 +53,9 @@ class knight{
         }
 };
 
-void printBoard(int** board){
-    for(int i=0;i<5;i++){
-        for(int j=0;j<5;j++){
+void printBoard(int** board, int n){
+    for(int i=0;i<n;i++){
+        for(int j=0;j<n;j++){
             cout<<setw(3)<<board[i][j];
         }
         cout<<endl;
@@ -63,21 +63,24 @@ void printBoard(int** board){
 }
 
 int main(){
+
+    int n;
+    cin>>n;
     knight player;
     
-    int** board = new int*[5];
-    for(int i=0;i<5;i++){
-        board[i] = new int[5]();
+    int** board = new int*[n];
+    for(int i=0;i<n;i++){
+        board[i] = new int[n]();
     }
     
     board[0][0] = 1;
 
     int time = 2;
     int pop = 0;
-    while(time<=25){
+    while(time<=n*n){
         bool flag = false;
         for(int j=pop;j<8;j++){
-            if(player.push(board,j,time)){
+            if(player.push(board,j,time,n)){
                 cout<<"PUSH"<<time<<endl;
                 flag = true;
                 pop = 0;
@@ -88,16 +91,16 @@ int main(){
             time -= 1;
             cout<<"POP"<<time<<endl;
             if(time==1){
-                cout<<"FAIL";
+                cout<<"FAIL"<<endl;
                 break;
             }
             pop = player.pop(board)+1;
         }
         else time+=1;
+        printBoard(board,n);
     }
 
-    printBoard(board);
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < n; i++) {
         delete[] board[i];
     }
     delete[] board;
