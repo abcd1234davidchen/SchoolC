@@ -4,21 +4,27 @@ using namespace std;
 int main(){
     string ipt;
     while(cin>>ipt){
-        int flat=0;
-            for(size_t i=0;i<ipt.size();i++){
-            flat+=(ipt[i]-'0');
+        char alp1[256]={0};
+        for(size_t i=0;i<ipt.size();i++){
+            alp1[int(ipt[i])]++;
         }
-        //cout<<"FLAT"<<flat<<endl;
-        while(flat>=10){
-            int newFlat = 0;
-            int processFlat = flat;
-            while(processFlat>=10){
-                newFlat+=processFlat%10;
-                processFlat/=10;
+        cin>>ipt;
+        char alp2[256]={0};
+        for(size_t i=0;i<ipt.size();i++){
+            alp2[int(ipt[i])]++;
+        }
+        for(int i=0;i<256;i++){
+            if (alp1[i]>alp2[i]){
+                for(int j=0;j<alp2[i];j++){
+                    cout<<char(i);
+                }
             }
-            newFlat+=processFlat%10;
-            flat = newFlat;
+            else{
+                for(int j=0;j<alp1[i];j++){
+                    cout<<char(i);
+                }
+            }
         }
-        cout<<flat<<endl;
+        cout<<endl;
     }
 }
