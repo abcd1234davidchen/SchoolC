@@ -2,5 +2,6 @@
 using namespace std;
 
 int main(){
-    cout<<(-12)%11<<endl;
+    char test = 7;
+    cout<<test;
 }

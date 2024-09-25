@@ -96,6 +96,7 @@ void generation(int table[][vertical]){
 }
 
 void render(int table[][vertical]){
+    system("clear");
     for(int i=0;i<vertical;i++){
         for(int j=0;j<horizontal;j++){
             if(table[j][i]) cout<<"*";
@@ -122,7 +123,7 @@ int main(){
     while(1){
         generation(table);
         render(table);
-        usleep(500*1000);
+        usleep(50*1000);
         cout<<"--------"<<endl;
     }
 }
