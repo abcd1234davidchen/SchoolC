@@ -1,6 +1,7 @@
 .DS_Store
 outDebug
 build/
+output/
 .vscode/
 *.o
 *.json
