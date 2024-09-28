@@ -43,7 +43,8 @@ int main(){
             vec.push_back(add);
         }
     }
-    
+
+
     for(size_t i=0;i<vec.size();i++){
         for(size_t j=0;j<i;j++){
             if(vec[i].s<vec[j].s){

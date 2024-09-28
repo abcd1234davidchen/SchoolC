@@ -1,5 +1,8 @@
 #include <iostream>
-#include<iomanip>
+#include <iomanip>
+#include <chrono>
+#include <sys/resource.h>
+
 using namespace std;
 
 int directions[8][2] = {{-2,1},{-1,2},{1,2},{2,1},{2,-1},{1,-2},{-1,-2},{-2,-1}};
@@ -64,6 +67,12 @@ void printBoard(int** board, int n){
     }
 }
 
+void printMemoryUsage() {
+    struct rusage usage;
+    getrusage(RUSAGE_SELF, &usage);
+    cout << "Memory usage: " << usage.ru_maxrss << " KB" << endl;
+}
+
 int main(){
 
     int n;
@@ -76,6 +85,7 @@ int main(){
     }
     
     board[0][0] = 1;
+    auto start = chrono::high_resolution_clock::now();
 
     int time = 2;
     int pop = 0;
@@ -83,7 +93,6 @@ int main(){
         bool flag = false;
         for(int j=pop;j<8;j++){
             if(player.push(board,j,time,n)){
-                //cout<<"PUSH"<<time<<endl;
                 flag = true;
                 pop = 0;
                 break;
@@ -91,7 +100,6 @@ int main(){
         }
         if(!flag){
             time -= 1;
-            //cout<<"POP"<<time<<endl;
             if(time==1){
                 cout<<"FAIL"<<endl;
                 break;
@@ -99,11 +107,18 @@ int main(){
             pop = player.pop(board)+1;
         }
         else time+=1;
-        //cout<<"TIME"<<time<<endl;
     }
+
+    auto end = chrono::high_resolution_clock::now();
+    chrono::duration<double> elapsed = end - start;
+
     printBoard(board,n);
     for (int i = 0; i < n; i++) {
         delete[] board[i];
     }
+
     delete[] board;
+
+    cout << "Elapsed time: " << elapsed.count() << " seconds" << endl;
+    printMemoryUsage();
 }
