@@ -19,6 +19,7 @@ int main(){
             neg = true;
         }
         else if(neg){
+            pol.back()*=10;
             pol.back()-=(ipt[i]-'0');
         }
         else{
