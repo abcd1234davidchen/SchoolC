@@ -1,5 +1,9 @@
+//Author: 陳展皝 B123245006
+//Date: Sept. 25, 2024
+//Purpose: 
+
 #include <iostream>
-#include<iomanip>
+#include <iomanip>
 using namespace std;
 
 int directions[8][2] = {{-2,1},{-1,2},{1,2},{2,1},{2,-1},{1,-2},{-1,-2},{-2,-1}};
@@ -36,11 +40,9 @@ class knight{
                 newNode->location[2] = d;
                 newNode->next = top;
                 top = newNode;
-                //cout<<"I"<<newI<<"J"<<newJ<<endl;
                 return true;
             }
             else{
-                //cout<<"NOT OK"<<endl;
                 return false;
             }
         }
@@ -83,7 +85,6 @@ int main(){
         bool flag = false;
         for(int j=pop;j<8;j++){
             if(player.push(board,j,time,n)){
-                //cout<<"PUSH"<<time<<endl;
                 flag = true;
                 pop = 0;
                 break;
@@ -91,7 +92,6 @@ int main(){
         }
         if(!flag){
             time -= 1;
-            //cout<<"POP"<<time<<endl;
             if(time==1){
                 cout<<"FAIL"<<endl;
                 break;
@@ -99,7 +99,6 @@ int main(){
             pop = player.pop(board)+1;
         }
         else time+=1;
-        //cout<<"TIME"<<time<<endl;
     }
     printBoard(board,n);
     for (int i = 0; i < n; i++) {

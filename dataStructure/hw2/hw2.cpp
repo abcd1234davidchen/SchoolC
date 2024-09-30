@@ -1,6 +1,6 @@
 //Author: 陳展皝 B123245006
 //Date: Sept. 11, 2024
-//Purpose: 
+//Purpose: input two sets and do +,-,*,>= and include operations based on the sets
 
 #include<iostream>
 #include<cstring>
