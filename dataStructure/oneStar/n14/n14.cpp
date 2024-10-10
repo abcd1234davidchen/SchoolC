@@ -12,7 +12,8 @@ int dayOfYear(int m, int d){
 }
 
 int main(){
-    string dayOfWeek[7] = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};    int monday = dayOfYear(4,4)%7;
+    string dayOfWeek[7] = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
+    int monday = dayOfYear(4,4)%7;
     int time;
     cin>>time;
     for(int i=0;i<time;i++){
