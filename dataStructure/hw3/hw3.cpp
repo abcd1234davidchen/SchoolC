@@ -23,7 +23,7 @@ class knight{           //stack class
             top->location[0]=0;     //Set the initalize location to be (0,0)
             top->location[1]=0;
             top->location[2]=-1;     //set direction to be not existed
-            top->next = nullptr;    //set next to be null
+            top->next = NULL;    //set next to be null
         }
 
         bool push(int **board,int d,int step,int n){
