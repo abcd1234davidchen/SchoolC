@@ -1,3 +1,7 @@
+//Author: 陳展皝 B123245006
+//Date: Nov. 5, 2024
+//Purpose: Polynominal addition and multiplication
+
 #include <iostream>
 using namespace std;
 
@@ -22,7 +26,7 @@ class poly{
 
         ~poly(){    //destructor
             node* current = head;
-            while(current != nullptr){  //when not null
+            while(current != NULL){  //when not null
                 node* nextNode = current->next; //remember next
                 delete current;         //delete
                 current = nextNode;     //move to next
