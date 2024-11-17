@@ -9,25 +9,25 @@ class node{
         node* leftNode;
         node* rightNode;
     public:
-        node(int v,node* lft=nullptr,node* rht=nullptr):value(v),leftNode(lft),rightNode(rht){};
+        node(int v,node* lft=NULL,node* rht=NULL):value(v),leftNode(lft),rightNode(rht){};
 };
 
 class tree{
     private:
         node* head;
     public:
-        tree(){head = nullptr;}
+        tree(){head = NULL;}
 
-        void insert(int n,node* current=nullptr){
-            if(head==nullptr){
+        void insert(int n,node* current=NULL){
+            if(head==NULL){
                 head = new node(n);
                 return;
             }
-            if(current==nullptr){
+            if(current==NULL){
                 current = head;
             }
             if(current->value<n){
-                if(current->rightNode!=nullptr){
+                if(current->rightNode!=NULL){
                     insert(n,current->rightNode);
                 }
                 else{
@@ -35,7 +35,7 @@ class tree{
                 }
             }
             else if(current->value>n){
-                if(current->leftNode!=nullptr){
+                if(current->leftNode!=NULL){
                     insert(n,current->leftNode);
                 }
                 else{
@@ -49,7 +49,7 @@ class tree{
         }
 
         void remove(int n){
-            if(head == nullptr) return;
+            if(head == NULL) return;
 
             node* prev = head;
             node* targ = head;
@@ -63,19 +63,19 @@ class tree{
                 }
             }
 
-            if(targ->leftNode==nullptr&&targ->rightNode==nullptr){
+            if(targ->leftNode==NULL&&targ->rightNode==NULL){
                 if(prev==targ){
-                    head=nullptr;
+                    head=NULL;
                 }
                 else if(prev->value>targ->value){
-                    prev->leftNode=nullptr;
+                    prev->leftNode=NULL;
                 }
                 else if(prev->value<targ->value){
-                    prev->rightNode=nullptr;
+                    prev->rightNode=NULL;
                 }
                 delete(targ);
             }
-            else if(targ->leftNode==nullptr){
+            else if(targ->leftNode==NULL){
                 if(prev==targ) head = targ->rightNode;
                 else if(prev->value>targ->value){
                     prev->leftNode=targ->rightNode;
@@ -85,7 +85,7 @@ class tree{
                 }
                 delete(targ);
             }
-            else if(targ->rightNode==nullptr){
+            else if(targ->rightNode==NULL){
                 if(prev==targ) head = targ->leftNode;
                 else if(prev->value>targ->value){
                     prev->leftNode=targ->leftNode;
@@ -97,23 +97,23 @@ class tree{
             }
             else{
                 node* rplm = targ->rightNode;
-                while(rplm->leftNode!=nullptr) rplm = rplm->leftNode;
+                while(rplm->leftNode!=NULL) rplm = rplm->leftNode;
                 int rpmN = rplm->value;
                 remove(rpmN);
                 targ->value = rpmN;
             }
         }
 
-        void print(node* current=nullptr,int mode = 0){
+        void print(node* current=NULL,int mode = 0){
             if(mode==0){cout<<"VALUE: ";}
-            if(current==nullptr) current=head;
-            if(current->leftNode!=nullptr) print(current->leftNode,(mode==0?1:mode));
-            if(current!=nullptr){
+            if(current==NULL) current=head;
+            if(current->leftNode!=NULL) print(current->leftNode,(mode==0?1:mode));
+            if(current!=NULL){
                 if(mode==0||mode==1)cout<<setw(3)<<current->value;
-                if(mode==2)cout<<setw(3)<<((current->leftNode!=nullptr)?current->leftNode->value:0);
-                if(mode==3)cout<<setw(3)<<((current->rightNode!=nullptr)?current->rightNode->value:0);
+                if(mode==2)cout<<setw(3)<<((current->leftNode!=NULL)?current->leftNode->value:0);
+                if(mode==3)cout<<setw(3)<<((current->rightNode!=NULL)?current->rightNode->value:0);
             };
-            if(current->rightNode!=nullptr) print(current->rightNode,(mode==0?1:mode));
+            if(current->rightNode!=NULL) print(current->rightNode,(mode==0?1:mode));
             if(mode==0) {
                 cout<<endl;
                 cout<<"LEFT : ";
