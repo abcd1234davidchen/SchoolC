@@ -19,8 +19,19 @@ void heapSort(){
 
 }
 
-void quickSort(){
-
+void quickSort(int* a,int n){
+    if(n<=1) return;
+    int pivot = a[n-1];
+    int i=0;
+    for(int j=0;j<n-1;++j){
+        if(a[j]<pivot){
+            swap(a[j],a[i]);
+            ++i;
+        }
+    }
+    swap(a[n-1],a[i]);
+    quickSort(a,i);
+    quickSort(a+i+1,n-i-1);
 }
 
 void cqsort(int* a, int n){
