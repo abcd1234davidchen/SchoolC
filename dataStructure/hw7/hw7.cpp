@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include <cstdlib>
 #include <ctime>
 #include <chrono>
@@ -15,8 +16,29 @@ void selectionSort(int* a,int n){
     }
 }
 
-void heapSort(){
 
+void heapify(int* a,int n,int i){
+    int largest=i;
+    int l=2*i+1;
+    int r=2*i+2;
+    if(l<n&&a[l]>a[largest]){
+        largest = l;
+    }
+    if(r<n&&a[r]>a[largest]){
+        largest = r;
+    }
+    if(i!=largest){
+        swap(a[i],a[largest]);
+        heapify(a,n,largest);
+    }
+}
+void heapSort(int* a,int n){
+    for (int i = n / 2 - 1; i >= 0; i--)
+        heapify(a, n, i);
+    for (int i = n - 1; i > 0; i--) {
+        swap(a[0], a[i]);
+        heapify(a, i, 0);
+    }
 }
 
 void quickSort(int* a,int n){
@@ -50,11 +72,21 @@ void print(int*a, int n){
     cout<<endl;
 }
 
-void generateRandom(int* a, int n){
+void writeUnsorted(int* a,int n){
+    ofstream out;
+    out.open("input.txt");
     srand(static_cast<unsigned int>(time(0)));
     for(int i=0;i<n;i++){
         a[i]=rand()%(n*10);
     }
+}
+
+void readUnsorted(){
+    
+}
+
+void writeSorted(){
+
 }
 
 
@@ -65,15 +97,15 @@ int main(){
         int setN = 500000;
         int* ogArr = new int[setN];
         int* arr = new int[setN];
-        generateRandom(ogArr,setN);
+        //generateRandom(ogArr,setN);
 
         copy(ogArr,ogArr+setN,arr);
         auto start = high_resolution_clock::now();
-        selectionSort(arr,setN);
+        quickSort(arr,setN);
         auto stop = high_resolution_clock::now();
         auto duration = duration_cast<milliseconds>(stop - start);
-        cout << "Time taken by selectionSort: " << duration.count() << " milliseconds" << endl;
-        
+        cout << "Time taken by quickSort: " << duration.count() << " milliseconds" << endl;
+        //print(arr,setN);
     }
     else{
         //int dataN[] = {100,500,1000,5000,10000,50000,100000,500000};
