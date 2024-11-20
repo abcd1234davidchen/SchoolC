@@ -3,6 +3,7 @@
 #include <cstdlib>
 #include <ctime>
 #include <chrono>
+#include <iomanip>
 using namespace std;
 using namespace std::chrono;
 
@@ -33,8 +34,7 @@ void heapify(int* a,int n,int i){
     }
 }
 void heapSort(int* a,int n){
-    for (int i = n / 2 - 1; i >= 0; i--)
-        heapify(a, n, i);
+    for (int i = n / 2 - 1; i >= 0; i--) heapify(a, n, i);
     for (int i = n - 1; i > 0; i--) {
         swap(a[0], a[i]);
         heapify(a, i, 0);
@@ -56,8 +56,11 @@ void quickSort(int* a,int n){
     quickSort(a+i+1,n-i-1);
 }
 
+int compare(const void* a, const void* b) {
+    return (*(int*)a - *(int*)b);
+}
 void cqsort(int* a, int n){
-    qsort(a,size_t(n),sizeof(int),[](const void* a,const void* b)->int{return (*(int*)a - *(int*)b);});
+    qsort(a, size_t(n), sizeof(int), compare);
 }
 
 void sortfunc(int* a,int n){
@@ -72,42 +75,111 @@ void print(int*a, int n){
     cout<<endl;
 }
 
-void writeUnsorted(int* a,int n){
+void writeUnsorted(int n){
     ofstream out;
     out.open("input.txt");
+    out<<n<<endl;
     srand(static_cast<unsigned int>(time(0)));
     for(int i=0;i<n;i++){
-        a[i]=rand()%(n*10);
+        out<<rand()%(n*10)<<endl;
+    }
+    out.close();
+}
+
+void readUnsorted(int* a,int& n){
+    ifstream in;
+    in.open("input.txt");
+    in>>n;
+    int temp;
+    int i=0;
+    while(in>>temp){
+        a[i]=temp;
+        i++;
+    }
+    in.close();
+}
+
+void writeSorted(int m,string method,int* a,int n){
+    char c = static_cast<char>('A' + m);
+    ofstream out;
+    out.open("output" + string(1, c) + ".txt");
+    out<<method;
+    for(int i=0;i<n;i++){
+        out<<endl<<a[i];
     }
 }
 
-void readUnsorted(){
+int sortBy(int* a,int i,int n,bool table){
+    string methods[5] = {"Selection Sort", "Heap Sort", "Quick Sort", "C qsort", "C++ std::sort"};
+
+    auto start = high_resolution_clock::now();
+
+    switch (i){
+    case 0:
+        selectionSort(a,n);
+        break;
+    case 1:
+        heapSort(a,n);
+        break;
+    case 2:
+        quickSort(a,n);
+        break;
+    case 3:
+        cqsort(a,n);
+        break;
+    case 4:
+        sortfunc(a,n);
+        break;
+    default:
+        break;
+    }
     
+    auto stop = high_resolution_clock::now();
+    auto duration = duration_cast<milliseconds>(stop - start);
+    if(!table) cout << "Time taken by "<<methods[i]<<": " << duration.count() << " milliseconds" << endl;
+    
+    writeSorted(i,methods[i],a,n);
+    return static_cast<int>(duration.count());
 }
 
-void writeSorted(){
+void run(int n=20,bool table=false){
+    writeUnsorted(n);
+    int* ogArr = new int[n];
+    int* arr = new int[n];
 
-}
 
-
-int main(){
-    bool handout = true;
-    if (handout){
-
-        int setN = 500000;
-        int* ogArr = new int[setN];
-        int* arr = new int[setN];
-        //generateRandom(ogArr,setN);
-
-        copy(ogArr,ogArr+setN,arr);
-        auto start = high_resolution_clock::now();
-        quickSort(arr,setN);
-        auto stop = high_resolution_clock::now();
-        auto duration = duration_cast<milliseconds>(stop - start);
-        cout << "Time taken by quickSort: " << duration.count() << " milliseconds" << endl;
-        //print(arr,setN);
+    readUnsorted(ogArr,n);
+    if(table){
+        for(int i=0;i<5;i++){
+            if(i!=0) cout<<"       ";
+            for(int j=0;j<5;j++){
+                copy(ogArr,ogArr+n,arr);
+                cout<<setw(7)<<sortBy(arr,j,n,table);
+            }
+            cout<<endl;
+        }
     }
     else{
-        //int dataN[] = {100,500,1000,5000,10000,50000,100000,500000};
+        for(int i=0;i<5;i++){
+            copy(ogArr,ogArr+n,arr);
+            sortBy(arr,i,n,table);
+        }
+    }
+}
+
+int main(){
+    bool table = true;
+    if (!table){
+        run(50000);
+    }
+    else{
+        int dataN[] = {100,500,1000,5000,10000,50000,100000,500000};
+        cout<<"       "<<"   sele"<<"   heap"<<"   qsor"<<"   cqSo"<<"   c+qS"<<endl;
+        for(int j=0;j<8;j++){
+            cout<<setw(7)<<dataN[j];
+            run(dataN[j],true);
+            cout<<endl;
+        }
+        cout<<endl;
     }
 }
