@@ -86,6 +86,13 @@ void writeUnsorted(int n){
     out.close();
 }
 
+void readFirstLine(int& n){
+    ifstream in;
+    in.open("input.txt");
+    in>>n;
+    in.close();
+}
+
 void readUnsorted(int* a,int& n){
     ifstream in;
     in.open("input.txt");
@@ -144,20 +151,31 @@ int sortBy(int* a,int i,int n,bool table){
 
 void run(int n=20,bool table=false){
     writeUnsorted(n);
+    readFirstLine(n);
+
     int* ogArr = new int[n];
     int* arr = new int[n];
 
 
     readUnsorted(ogArr,n);
     if(table){
+        int avg[5]={0};
+        cout<<setw(7)<<n;
         for(int i=0;i<5;i++){
             if(i!=0) cout<<"       ";
             for(int j=0;j<5;j++){
                 copy(ogArr,ogArr+n,arr);
-                cout<<setw(7)<<sortBy(arr,j,n,table);
+                int time=sortBy(arr,j,n,table);
+                cout<<setw(7)<<time;
+                avg[j]+=time;
             }
             cout<<endl;
         }
+        cout<<"    avg";
+        for(int i=0;i<5;i++){
+            cout<<setw(7)<<avg[i]/5;
+        }
+        cout<<endl;
     }
     else{
         for(int i=0;i<5;i++){
@@ -176,7 +194,6 @@ int main(){
         int dataN[] = {100,500,1000,5000,10000,50000,100000,500000};
         cout<<"       "<<"   sele"<<"   heap"<<"   qsor"<<"   cqSo"<<"   c+qS"<<endl;
         for(int j=0;j<8;j++){
-            cout<<setw(7)<<dataN[j];
             run(dataN[j],true);
             cout<<endl;
         }
