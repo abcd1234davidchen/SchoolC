@@ -1,3 +1,6 @@
+//Author: 陳展皝 B123245006
+//Date: Nov. 12, 2024
+//Purpose: compare different sorting methods
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
