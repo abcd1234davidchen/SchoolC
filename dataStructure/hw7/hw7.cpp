@@ -2,27 +2,24 @@
 #include <fstream>
 #include <cstdlib>
 #include <ctime>
-#include <chrono>
 #include <iomanip>
 #include <algorithm>
 using namespace std;
-using namespace std::chrono;
 
-double selectionSort(int* a,int n,int limit){
-    auto start = high_resolution_clock::now();
-    for(int i=0;i<n-1;i++){
-        auto now = high_resolution_clock::now();
-        if( duration_cast<seconds>(now - start).count()>limit) return -1;
-        int j=i;
+double selectionSort(int* a,int n,int limit){   //code for selection sort
+    clock_t start = clock();    //start time
+    for(int i=0;i<n-1;i++){     //go through all the numbers
+        clock_t now = clock();  //now for TLE
+        if(static_cast<double>(now - start)/(CLOCKS_PER_SEC)>limit) return -1;  //return -1 when TLE
+        int j=i;                //j for the smallest
         for(int k=i+1;k<n;k++){
-            if(a[j]>a[k]) j=k;
+            if(a[j]>a[k]) j=k;  //if k is smaller change it to j
         }
-        swap(a[i],a[j]);
+        swap(a[i],a[j]);        //swap i to the smallest
     }
-    auto now = high_resolution_clock::now();
-    return static_cast<int>(duration_cast<milliseconds>(now - start).count())*1.0/1000;
+    clock_t now = clock();      //clock to remember time at last
+    return static_cast<double>(now - start)/(CLOCKS_PER_SEC);   //return time useds
 }
-
 
 void heapify(int* a,int n,int i){
     int largest=i;
@@ -41,20 +38,20 @@ void heapify(int* a,int n,int i){
 }
 double heapSort(int* a,int n,int limit){
     for (int i = n / 2 - 1; i >= 0; i--) heapify(a, n, i);
-    auto start = high_resolution_clock::now();
+    clock_t start = clock();
     for (int i = n - 1; i > 0; i--) {
-        auto now = high_resolution_clock::now();
-        if( duration_cast<seconds>(now - start).count()>limit) return -1;
+        clock_t now = clock();
+        if(static_cast<double>(now - start)/(CLOCKS_PER_SEC)>limit) return -1;
         swap(a[0], a[i]);
         heapify(a, i, 0);
     }
-    auto now = high_resolution_clock::now();
-    return static_cast<int>(duration_cast<milliseconds>(now - start).count())*1.0/1000;
+    clock_t now = clock();
+    return static_cast<double>(now - start)/(CLOCKS_PER_SEC);
 }
 
 double quickSort(int* a,int n,int limit){
     if(n<=1) return true;
-    auto start = high_resolution_clock::now();
+    clock_t start = clock();
     int pivot = a[n-1];
     int i=0;
     for(int j=0;j<n-1;++j){
@@ -67,8 +64,8 @@ double quickSort(int* a,int n,int limit){
 
     quickSort(a,i,limit);
     quickSort(a+i+1,n-i-1,limit);
-    auto now = high_resolution_clock::now();
-    double time = static_cast<int>(duration_cast<milliseconds>(now - start).count())*1.0/1000;
+    clock_t now = clock();
+    double time = static_cast<double>(now - start)/(CLOCKS_PER_SEC);
     return (time<limit?time:-1);
 }
 
@@ -76,22 +73,22 @@ int compare(const void* a, const void* b) {
     return (*(int*)a - *(int*)b);
 }
 double cqsort(int* a, int n,int limit){
-    auto start = high_resolution_clock::now();
+    clock_t start = clock();
     qsort(a, size_t(n), sizeof(int), compare);
-    auto now = high_resolution_clock::now();
-    double time = static_cast<int>(duration_cast<milliseconds>(now - start).count())*1.0/1000;
+    clock_t now = clock();
+    double time = static_cast<double>(now - start)/(CLOCKS_PER_SEC);
     return (time<limit?time:-1);
 }
 
 double sortfunc(int* a,int n,int limit){
-    auto start = high_resolution_clock::now();
+    clock_t start = clock();
     sort(a,a+n);
-    auto now = high_resolution_clock::now();
-    double time = static_cast<int>(duration_cast<milliseconds>(now - start).count())*1.0/1000;
+    clock_t now = clock();
+    double time = static_cast<double>(now - start)/(CLOCKS_PER_SEC);
     return (time<limit?time:-1);
 }
 
-void writeUnsorted(int n){
+void generateUnsorted(int n){
     ofstream out;
     out.open("input.txt");
     out<<n<<endl;
@@ -123,9 +120,10 @@ void readUnsorted(int* a,int& n){
 }
 
 void writeSorted(int m,string method,int* a,int n){
-    char c = static_cast<char>('A' + m);
     ofstream out;
-    out.open("output" + string(1, c) + ".txt");
+    char c[12]="output .txt";
+    c[6]=static_cast<char>('A'+m);
+    out.open(c);
     out<<method;
     for(int i=0;i<n;i++){
         out<<endl<<a[i];
@@ -133,7 +131,7 @@ void writeSorted(int m,string method,int* a,int n){
 }
 
 double sortBy(int* a,int i,int n,bool table,int limit){
-    string methods[5] = {"Selection Sort", "Heap Sort", "Quick Sort", "C qsort", "C++ std::sort"};
+    string methods[5] = {"Selection Sort", "Heap Sort", "Quick Sort", "C qsort()", "C++ sort()"};
 
     double time = 0;
 
@@ -157,7 +155,7 @@ double sortBy(int* a,int i,int n,bool table,int limit){
         break;
     }
     
-    if(!table) cout << "Time taken by "<<methods[i]<<": " << time << " seconds" << endl;
+    if(!table) cout<<setw(7)<<setprecision(3)<<fixed<< "Time taken by "<<methods[i]<<": " << time << " seconds" << endl;
     
     writeSorted(i,methods[i],a,n);
     return time;
@@ -166,10 +164,10 @@ double sortBy(int* a,int i,int n,bool table,int limit){
 void run(int n=20, int limit=10, bool table=false){
     if(table){
         double avg[5]={0};
-        cout<<setw(7)<<n;
+        cout<<setw(7)<<n<<" ";
         for(int i=0;i<10;i++){
 
-            writeUnsorted(n);
+            generateUnsorted(n);
             readFirstLine(n);
 
             int* ogArr = new int[n];
@@ -177,7 +175,7 @@ void run(int n=20, int limit=10, bool table=false){
 
             readUnsorted(ogArr,n);
 
-            if(i!=0) cout<<"       ";
+            if(i!=0) cout<<"        ";
             for(int j=0;j<5;j++){
                 copy(ogArr,ogArr+n,arr);
                 double time=sortBy(arr,j,n,table,limit);
@@ -186,15 +184,13 @@ void run(int n=20, int limit=10, bool table=false){
             }
             cout<<endl;
         }
-        cout<<"    avg";
+        cout<<"    avg ";
         for(int i=0;i<5;i++){
             cout<<setw(7)<<setprecision(3)<<fixed<<avg[i]/10;
         }
         cout<<endl;
     }
     else{
-
-        writeUnsorted(n);
         readFirstLine(n);
 
         int* ogArr = new int[n];
@@ -210,13 +206,15 @@ void run(int n=20, int limit=10, bool table=false){
 }
 
 int main(){
-    bool table = true;
-    int limit = 30;
+    bool table = false;
+    int limit = 10;
     if (!table){
-        run(50000,limit);
+        generateUnsorted(50000);
+        run(0,limit,false);
     }
     else{
         int dataN[] = {100,500,1000,5000,10000,50000,100000,500000};
+        cout<<"'-1' stands for TLE which is "<<limit<<" seconds in this case"<<endl;
         cout<<"       "<<"   sele"<<"   heap"<<"   qsor"<<"   cqSo"<<"   c+qS"<<endl;
         for(int j=0;j<8;j++){
             run(dataN[j],limit,true);
