@@ -53,7 +53,7 @@ double heapSort(int* a,int n,int limit){
 }
 
 double quickSort(int* a,int n,int limit){
-    if(n<=1) return true;       //if the size is 1 or less return
+    if(n<=1) return 0;       //if the size is 1 or less return
     clock_t start = clock();    //start timer
     int pivot = a[n-1];         //pivot that is the right most item
     int i=0;                    //i to control where to put pivot
@@ -203,7 +203,7 @@ void run(int n=20, int limit=10, bool table=false){
 }
 
 int main(){
-    bool table = false; //control whether using a table
+    bool table = true; //control whether using a table
     int limit = 10;     //set limit to 10 seconds
     if (!table){        //output to terminal
         //generateUnsorted(50000);    //generate data
