@@ -203,10 +203,10 @@ void run(int n=20, int limit=10, bool table=false){
 }
 
 int main(){
-    bool table = true; //control whether using a table
-    int limit = 10;     //set limit to 10 seconds
+    bool table = false; //control whether using a table
+    int limit = 2000;     //set limit to 10 seconds
     if (!table){        //output to terminal
-        //generateUnsorted(50000);    //generate data
+        generateUnsorted(1000000);    //generate data
         run(0,limit,false);     //sort
     }
     else{   //output as a table

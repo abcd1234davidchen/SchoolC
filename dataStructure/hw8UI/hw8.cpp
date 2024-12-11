@@ -210,7 +210,7 @@ void decompress(string inFileName,string outFileName){
 }
 
 int main(int argc, char* argv[]) {
-    bool debugMode=1;
+    bool debugMode=0;
     if(debugMode){
         compress("image.jpg","ipt.txt");
         decompress("ipt.txt","img2.jpg");
