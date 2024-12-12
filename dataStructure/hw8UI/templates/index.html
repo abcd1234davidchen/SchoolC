@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Upload and Download</title>
+</head>
+<body>
+    <h1>File Upload and Download</h1>
+    <form id="uploadForm" enctype="multipart/form-data">
+        <input type="file" id="fileInput" name="file" required>
+        <input type="text" id="customFileName" name="customFileName" placeholder="Enter custom file name" required>
+        <button type="button" id="compressButton">Compress</button>
+        <button type="button" id="decompressButton">Decompress</button>
+    </form>
+    <div id="message"></div>
+    <div id="downloadLink" style="display: none;">
+        <a id="downloadAnchor" href="#" download>Download Processed File</a>
+    </div>
+
+    <script>
+        document.getElementById('compressButton').addEventListener('click', function() {
+            handleSubmit('compress');
+        });
+
+        document.getElementById('decompressButton').addEventListener('click', function() {
+            handleSubmit('decompress');
+        });
+
+        function handleSubmit(action) {
+            const formData = new FormData();
+            const fileInput = document.getElementById('fileInput');
+            const customFileName = document.getElementById('customFileName').value;
+            formData.append('file', fileInput.files[0]);
+            formData.append('customFileName', customFileName);
+
+            fetch(`/${action}`, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                const messageDiv = document.getElementById('message');
+                if (data.error) {
+                    messageDiv.textContent = data.error;
+                } else {
+                    messageDiv.textContent = data.message;
+                    const downloadLink = document.getElementById('downloadLink');
+                    const downloadAnchor = document.getElementById('downloadAnchor');
+                    downloadAnchor.href = `/download/${data.output_file}`;
+                    downloadLink.style.display = 'block';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+    </script>
+</body>
+</html>
