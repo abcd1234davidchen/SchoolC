@@ -10,7 +10,6 @@
 using namespace std;
 
 class node{
-    friend class toHfmTree;
     public:
         char symbol;
         int freq;
@@ -214,12 +213,6 @@ void decompress(string inFileName,string outFileName){
 }
 
 int main(int argc, char* argv[]) {
-    bool debugMode=0;
-    if(debugMode){
-        compress("input.txt","ipt.txt");
-        decompress("ipt.txt","ipt2.txt");
-    }
-    else
     if (argc == 6) {
         string mode = argv[1];
         string first = argv[2];
@@ -259,8 +252,13 @@ int main(int argc, char* argv[]) {
 
     }
     else{
+        cout << "DEMO RUN" <<endl<<endl;
+        compress("input.txt","ipt.txt");
+        cout<<endl<<"COMPRESS SUCCESS"<<endl<<endl;
+        decompress("ipt.txt","ipt2.txt");
+        cout<<endl<<"DECOMPRESS SUCCESS"<<endl<<endl;
         cout << "Usage: " << argv[0] << " -c|-u -i<input_file> -o<output_file>" << endl;
-        return 1;
+        return 0;
     }
 
     return 0;
