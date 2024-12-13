@@ -132,6 +132,7 @@ void compress(string inFileName,string outFileName){
     outFile<<ogCharCount<<" "<<compressFull<<" "<<setprecision(2)<<fixed<<ogCharCount*1.0/compressFull*100<<" "<<uncompress.size()<<" "<<stringMap.size()<<endl;
     for(auto& one:stringMap){
         outFile<<one.first<<static_cast<unsigned char>(one.second.size())<<one.second;
+        cout<<static_cast<int>(one.first)<<":"<<one.second<<endl;
     }
     outFile<<endl;
     unsigned char push='\0';
