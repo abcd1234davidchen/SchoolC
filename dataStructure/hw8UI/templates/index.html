@@ -14,6 +14,7 @@
         <button type="button" id="decompressButton">Decompress</button>
     </form>
     <div id="message"></div>
+    <div id="details"></div>
     <div id="downloadLink" style="display: none;">
         <a id="downloadAnchor" href="#" download>Download Processed File</a>
     </div>
@@ -41,10 +42,13 @@
             .then(response => response.json())
             .then(data => {
                 const messageDiv = document.getElementById('message');
+                const detailsDiv = document.getElementById('details');
                 if (data.error) {
                     messageDiv.textContent = data.error;
+                    detailsDiv.textContent = data.details;
                 } else {
                     messageDiv.textContent = data.message;
+                    detailsDiv.textContent = data.details;
                     const downloadLink = document.getElementById('downloadLink');
                     const downloadAnchor = document.getElementById('downloadAnchor');
                     downloadAnchor.href = `/download/${data.output_file}`;

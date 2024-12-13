@@ -19,8 +19,8 @@ def rnhfm(input_file_path, output_file_path):
         result = subprocess.run(["./hw8", "-c", input_file_path, output_file_path], capture_output=True, text=True)
         if result.returncode != 0:
             print(f"Error: {result.stderr}")
-            return False
-        return True
+            return False, result.stderr
+        return True, result.stdout
     except Exception as e:
         print(f"Error running Huffman compress program: {e}")
         return False
@@ -30,8 +30,8 @@ def dehfm(input_file_path, output_file_path):
         result = subprocess.run(["./hw8", "-u", input_file_path, output_file_path], capture_output=True, text=True)
         if result.returncode != 0:
             print(f"Error: {result.stderr}")
-            return False
-        return True
+            return False, result.stderr
+        return True, result.stdout
     except Exception as e:
         print(f"Error running Huffman decompress program: {e}")
         return False
@@ -59,10 +59,11 @@ def upload_file():
     
     file.save(input_file_path)
     
-    if not rnhfm(input_file_path, output_file_path):
-        return jsonify({"error": "Huffman compression failed"}), 500
+    success,message= rnhfm(input_file_path,output_file_path)
+    if not success:
+        return jsonify({"error": "Huffman compression failed", "details":message}), 500
     
-    return jsonify({"message": "File uploaded and compressed successfully", "output_file": filename})
+    return jsonify({"message": "File uploaded and compressed successfully", "output_file": filename, "details": message})
 
 @app.route('/decompress', methods=['POST'])
 def decompress_file():
@@ -83,10 +84,11 @@ def decompress_file():
     
     file.save(input_file_path)
     
-    if not dehfm(input_file_path, output_file_path):
-        return jsonify({"error": "Huffman decompression failed"}), 500
+    success,message= dehfm(input_file_path,output_file_path)
+    if not success:
+        return jsonify({"error": "Huffman compression failed", "details":message}), 500
     
-    return jsonify({"message": "File uploaded and decompressed successfully", "output_file": filename})
+    return jsonify({"message": "File uploaded and compressed successfully", "output_file": filename, "details": message})
 
 @app.route('/download/<filename>', methods=['GET'])
 def download_file(filename):

@@ -167,6 +167,9 @@ void decompress(string inFileName,string outFileName){
     ifstream inFile(inFileName,ios::binary);
     int mapSize;
     inFile>>uncmp>>cpres>>ratio>>ogLen>>mapSize;
+    cout<<"Original Size "<<uncmp<<endl;
+    cout<<"Compressed Size "<<cpres<<endl;
+    cout<<setprecision(2)<<fixed<<"Ratio "<<ratio<<"%"<<endl;
     char c;
     char s;
     int sSize;
@@ -212,8 +215,8 @@ void decompress(string inFileName,string outFileName){
 int main(int argc, char* argv[]) {
     bool debugMode=0;
     if(debugMode){
-        compress("image.jpg","ipt.txt");
-        decompress("ipt.txt","img2.jpg");
+        compress("input.txt","ipt.txt");
+        decompress("ipt.txt","ipt2.txt");
     }
     else
     if (argc == 6) {
@@ -243,11 +246,11 @@ int main(int argc, char* argv[]) {
 
         if(mode=="-c"){
             compress(firstName,secondName);
-            cout<<"SUCCESS"<<endl;
+            cout<<"COMPRESS SUCCESS"<<endl;
         }
         else if(mode=="-u"){
             decompress(firstName,secondName);
-            cout<<"SUCCESS"<<endl;
+            cout<<"DECOMPRESS SUCCESS"<<endl;
         }
         else{
             cout<<"INVALID"<<endl;
