@@ -96,8 +96,12 @@ void compress(string inFileName,string outFileName){
     node* head;
     head=vec[0];
     //transform into binary
-    toBinary(stringMap,head,"");
-
+    if(freqMap.size()==1){
+        toBinary(stringMap,head,"0");
+    }
+    else{
+        toBinary(stringMap,head,"");
+    }
     //change to binary
 
     //reopen file
