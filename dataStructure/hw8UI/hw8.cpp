@@ -11,34 +11,35 @@ using namespace std;
 
 class node{
     public:
-        char symbol;
-        int freq;
-        bool real;
-        node* left;
-        node* right;
+        char symbol;    //symbol of the char
+        int freq;       //frequency of char
+        bool real;      //real or not
+        node* left;     //left node
+        node* right;    //right node
 
         node(char sb,int f,bool rl=false,node* l = NULL,node* r = NULL){
-            symbol=sb;
+            symbol=sb;  //constructor of node
             freq=f;
             real=rl;
             left=l;
             right=r;
         }
-        node* operator+ (node& other){
+
+        node* operator+ (node& other){  //The operator for two node to add up
             node* rt=new node(' ',freq+other.freq,false);
-            if(symbol<other.symbol){
-                rt->left=this;
+            if(symbol<other.symbol){    //set the smaller node to be the left node
+                rt->left=this;          //and the bigger node to be the right one
                 rt->right=&other;
             }
             else{
                 rt->right=this;
                 rt->left=&other;
             }
-            rt->symbol=rt->left->symbol;
+            rt->symbol=rt->left->symbol;    //Set the symbol to be the smaller one
             return rt;
         }
 };
-void setbit(unsigned char& c,char bitvalue){
+void setbit(unsigned char& c,char bitvalue){    //push back the char for one and make LSB 0 or 1
     c = static_cast<unsigned char>(c << 1);
     c|=(bitvalue=='0')?0:1;
 }
@@ -113,7 +114,7 @@ void compress(string inFileName,string outFileName){
         uncompress+=stringMap[c];
     }
     //the size of compressed file
-    int compressFull=uncompress.size()/8+(uncompress.size()%8!=0);  //the size of outputstring
+    int compressFull=static_cast<int>(uncompress.size())/8+(uncompress.size()%8!=0);  //the size of outputstring
     compressFull+=static_cast<int>(ceil(log10(ogCharCount)));       //size of og char count
     compressFull+=9;    //space and endl
     for(auto& one:stringMap){
@@ -256,7 +257,7 @@ int main(int argc, char* argv[]) {
 
     }
     else{
-        cout << "DEMO RUN" <<endl<<endl;
+        cout << "~~DEMO RUN~~" <<endl<<endl;
         compress("input.txt","ipt.txt");
         cout<<endl<<"COMPRESS SUCCESS"<<endl<<endl;
         decompress("ipt.txt","ipt2.txt");
