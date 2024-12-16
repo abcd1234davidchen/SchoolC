@@ -1,3 +1,5 @@
+"""The program is only tested on Mac"""
+
 from flask import Flask, request, send_file, jsonify, render_template
 import os
 import subprocess
