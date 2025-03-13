@@ -2,11 +2,12 @@ CC = g++
 CFLAGS = -Wall -g
 
 main: main.cpp
-	$(CC) $(CFLAGS) -c main.cpp -o main.o
-	$(CC) $(CFLAGS) main.o -o main	
+	mkdir -p build
+	$(CC) $(CFLAGS) -c main.cpp -o build/main.o
+	$(CC) $(CFLAGS) build/main.o -o build/main	
 	
-exec: main
-	./main
+exec: build/main
+	./build/main
 
 clean:
-	rm -f main.o main
+	rm -f build/main.o build/main
