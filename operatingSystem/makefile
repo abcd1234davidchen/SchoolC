@@ -1,13 +1,12 @@
 CC = g++
-CFLAGS = -Wall -g
+CFLAGS = -Wall -g 
 
-main: main.cpp
+main: server.cpp client.cpp
 	mkdir -p build
-	$(CC) $(CFLAGS) -c main.cpp -o build/main.o
-	$(CC) $(CFLAGS) build/main.o -o build/main	
-	
-exec: build/main
-	./build/main
+	$(CC) $(CFLAGS) -c server.cpp -o build/server.o
+	$(CC) $(CFLAGS) build/server.o -o build/server
+	$(CC) $(CFLAGS) -c client.cpp -o build/client.o
+	$(CC) $(CFLAGS) build/client.o -o build/client
 
 clean:
-	rm -f build/main.o build/main
+	rm -f build/server.o build/server build/client.o build/client
