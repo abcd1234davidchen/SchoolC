@@ -3,11 +3,26 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <pthread.h>
+#include <sstream>
+#include <map>
 using namespace std;
 
 vector<int> clientSockets;
+map<int,string> clients;
 
 void message(const char* message,int senderSocket,int clientSocket = -1){
+
+    sockaddr_in clientAddress;
+    socklen_t clientAddrLen = sizeof(clientAddress);
+    getpeername(senderSocket, (struct sockaddr*)&clientAddress, &clientAddrLen);
+
+    ostringstream oss;
+    oss << "Client: "<< clients[senderSocket] << message;
+    string formattedMessage = oss.str();
+    if(strcmp(message,"kill")!=0){
+        message = formattedMessage.c_str();
+    }
+
     if (clientSocket==-1){
         for(int cs : clientSockets){
             if(cs!=senderSocket){
@@ -23,7 +38,6 @@ void message(const char* message,int senderSocket,int clientSocket = -1){
 
 void* handleClient(void* arg) {
     int clientSocket = *(int*)arg;
-    cout<<"SOCKET"<<clientSocket<<endl;
     delete (int*)arg;
 
     sockaddr_in clientAddress;
@@ -40,8 +54,20 @@ void* handleClient(void* arg) {
             break;
         }
         else if (bytesReceived > 0) {
-            cout << "Received from: " << ntohs(clientAddress.sin_port) << buffer << endl;
-            message(buffer,clientSocket);
+            
+            if(strncmp(buffer,"$ connect",9)==0){
+                stringstream ss;
+                ss<<buffer;
+                string name;
+                ss>>name>>name>>name>>name>>name;
+                clients[clientSocket]=name;
+                cout<<"Client "<<name<<" on address: "<< inet_ntoa(clientAddress.sin_addr)<<"/"<<ntohs(clientAddress.sin_port)<<endl;
+            }
+            else{
+                cout << "Received from " << ntohs(clientAddress.sin_port) << ": "<< buffer << endl;
+                message(buffer,clientSocket);
+            }
+            
         }
         else{
             cerr << "recv failed" << endl;
@@ -59,12 +85,23 @@ int main() {
         cerr << "Socket creation failed" << endl;
         return 1;
     }
+
+    int opt = 1;
+    if (setsockopt(serverSocket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) {
+        cerr << "setsockopt(SO_REUSEADDR) failed" << endl;
+        return 1;
+    }
     
     sockaddr_in serverAddress;
     serverAddress.sin_family = AF_INET;
     serverAddress.sin_port = htons(8080);
-    serverAddress.sin_addr.s_addr = INADDR_ANY;
-    bind(serverSocket, (struct sockaddr*)&serverAddress, sizeof(serverAddress));
+    if (inet_pton(AF_INET, "127.0.0.1", &serverAddress.sin_addr) <= 0) {
+        cerr << "Invalid address/ Address not supported" << endl;
+    }
+    if(::bind(serverSocket, (struct sockaddr*)&serverAddress, sizeof(serverAddress))==-1){
+        cerr<<"Bind failed" << endl;
+        return 1;
+    }
     
     cout << "IP: " << inet_ntoa(serverAddress.sin_addr) <<" Port: "<< ntohs(serverAddress.sin_port) << endl;
     
