@@ -15,16 +15,13 @@ void* handleServer(void* arg){
     while(true){
         char buffer[1024] = {0};
         int bytesReceived = recv(clientSocket,buffer,sizeof(buffer),0);
-        if (bytesReceived == 0||strcmp(buffer, "$ bye") == 0) {
+        if (bytesReceived == 0) {
             cout << "Server disconnected" << endl;
             exit(0);
             break;
         }
         else if (bytesReceived > 0) {
-            if(strcmp(buffer,"kill")==0){
-                exit(0);
-            }
-            cout <<endl<< buffer<< endl; 
+            cout << endl << buffer<< endl; 
         }
         else{
             cerr << "Disconnect" << endl;

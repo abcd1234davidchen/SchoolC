@@ -17,9 +17,9 @@ void message(const char* message,int senderSocket,int clientSocket = -1){
     getpeername(senderSocket, (struct sockaddr*)&clientAddress, &clientAddrLen);
 
     ostringstream oss;
-    oss << "Client: "<< clients[senderSocket] << message;
+    oss << clients[senderSocket] <<": "<< message;
     string formattedMessage = oss.str();
-    if(strcmp(message,"kill")!=0){
+    if(senderSocket!=0){
         message = formattedMessage.c_str();
     }
 
@@ -33,7 +33,6 @@ void message(const char* message,int senderSocket,int clientSocket = -1){
     else{
         send(clientSocket,message,strlen(message),0);
     }
-    if(strcmp(message,"kill")==0) exit(0);
 }
 
 void* handleClient(void* arg) {
@@ -63,11 +62,30 @@ void* handleClient(void* arg) {
                 clients[clientSocket]=name;
                 cout<<"Client "<<name<<" on address: "<< inet_ntoa(clientAddress.sin_addr)<<"/"<<ntohs(clientAddress.sin_port)<<endl;
             }
-            else{
-                cout << "Received from " << ntohs(clientAddress.sin_port) << ": "<< buffer << endl;
-                message(buffer,clientSocket);
+            else if(strncmp(buffer, "$ chat", 6) == 0) {
+                stringstream ss(buffer);
+                string command, recipient, msg;
+                ss >> command >> command >> recipient;
+                getline(ss, msg);
+                if (!msg.empty() && msg[0] == ' ') {
+                    msg.erase(0, 1);
+                }
+                if (!msg.empty() && msg[0] == '"' && msg[msg.size() - 1] == '"') {
+                    msg = msg.substr(1, msg.size() - 2);
+                }
+                cout << "Recipient: " << recipient << " Message: " << msg << endl;
+                auto it = find_if(clients.begin(), clients.end(), 
+                                  [&recipient](const pair<int, string>& client) {
+                                      return client.second == recipient;
+                                  });
+                if (it != clients.end()) {
+                    int recipientSocket = it->first;
+                    message(msg.c_str(), clientSocket, recipientSocket);
+                } else {
+                    string errorMsg = "User "+recipient+" does not exist";
+                    message(errorMsg.c_str(),-1,clientSocket);
+                }
             }
-            
         }
         else{
             cerr << "recv failed" << endl;
@@ -80,6 +98,7 @@ void* handleClient(void* arg) {
 }
 
 int main() {
+    clients[0]="Server";
     int serverSocket = socket(AF_INET, SOCK_STREAM, 0);
     if (serverSocket == -1) {
         cerr << "Socket creation failed" << endl;
