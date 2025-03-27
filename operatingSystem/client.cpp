@@ -23,6 +23,7 @@ void* handleServer(void* arg){
         else if (bytesReceived > 0) {
             cout << buffer <<endl; 
             if(strcmp("<Success>",buffer)==0) loginStat = true;
+            if(strcmp("<Kill>",buffer)==0) {system("clear");exit(0);}
         }
         else{
             cerr << "<Disconnect>" << endl;
@@ -77,7 +78,8 @@ int main(){
             getline(cin, login);
             continue;
         } 
-        int connectionStatus = connect(clientSocket, (struct sockaddr*)&serverAddress, sizeof(serverAddress));
+        int connectionStatus = connect(clientSocket,
+                (struct sockaddr*)&serverAddress, sizeof(serverAddress));
         if (connectionStatus == -1) {
             cerr << "Connection to the server failed" << endl;
             close(clientSocket);
@@ -95,7 +97,6 @@ int main(){
             getline(cin, login);
             continue;
         }
-        //login = "$ connect "+address+ " "+to_string(port)+" "+name;
         send(clientSocket, login.c_str(), strlen(login.c_str()), 0);
         usleep(100000);
         while(loginStat){
@@ -109,6 +110,7 @@ int main(){
         }
         close(clientSocket);
         if (login=="bye"||loginStat==false) {getline(cin,login);continue;}
+        usleep(100000);
         if (strncmp(login.c_str(), "$ connect", 9) == 0) continue;
     }
     return 0;
