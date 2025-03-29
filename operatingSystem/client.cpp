@@ -55,6 +55,7 @@ int main(){
                 }
                 break;
             }
+            else if(strncmp(login.c_str(), "kill", 9) == 0){system("clear");exit(0);}
             else{
                 cout<<"Invalid input"<<endl;
                 cout<<"Input: $ connect <address> <port> <name>"<<endl;
