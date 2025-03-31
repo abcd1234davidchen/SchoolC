@@ -1,9 +1,13 @@
 # Operating System Assignment: Client-Server Model and Threads
-In this assignment,I wrote a server and several clients that connects to the server through socket. With each connection being formed, a pthread is made to handle the client.
+In this assignment, I implemented a client-server model using sockets. With each connection being formed through socket, a pthread is made on server to handle the client.
+## System
+ - Compiler: Apple Clang version 16.0.0
+ - OS: macOS 15.3.2
 ## Manual
 The section is an instruction on how to use the program.
 ### Server
 Each output besides Init wipe terminal then write to whiteboard and output whiteboard with MUTEX on.
+
 |Process|Output|Notes|
 |---|---|---|
 |Init|`input <address> <port>`|input {address} {port}|
@@ -16,22 +20,24 @@ Each output besides Init wipe terminal then write to whiteboard and output white
 |Command|Output|Notes|
 |---|---|---|
 |`$ connect {address} {port}`|`<Success>` <br> `<User {name} is online, address: {address}/{port}>`|Connection formed and list out online user|
-| |`<User already exist>`|User already exist||`$ chat {user} "{message}"`|blank <br> `User {user} does not exist`|Success <br> Sent to invalid user|
+||`<User already exist>`|User already exist|
+|`$ chat {user} "{message}"`|blank|Success|
+||`User {user} does not exist`|Sent to invalid user|
 |`$ bye`|blank|Disconnect from server|
 
 ## Idea
 
 By design:
  - The whiteboard is a string
- - MUTEX is present everytime whiteboard is updated
+ - MUTEX is present every time whiteboard is updated
  - Besides the init message, every message in whiteboard has timestamp
  - Whiteboard is shown by wiping the whole terminal then output the whole string
  - `usleep` was used to ensure process is correctly ordered and does not stashed to one, causing difficulty in display
- - A hidden `kill` command is written to kill all existing client and the server or the client only when disconencted
+ - A hidden `kill` command is written to kill all existing client and the server or the client only when disconnected
 
 The whole process of an connection:
 
-0. The program is compiled using makefile and tested on a mac with multiple terminal windows
+0. The program is compiled using make and the executable is stored in build/ folder
 
 1. Turn on server and input the IP and Port to allow connection through socket
     - The server would notified and killed if the desired one is unusable

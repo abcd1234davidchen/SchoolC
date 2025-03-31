@@ -9,11 +9,12 @@
 #include <ctime>
 using namespace std;
 
-vector<int> clientSockets;
-map<int,string> clients;
-mutex wbMutex;
-string whiteboard;
+vector<int> clientSockets;  //list of existing client
+map<int,string> clients;    //client name
+mutex wbMutex;              //whiteboard mutex
+string whiteboard;          //whiteboard
 
+//Make string that contains current time
 string getCurrentTime() {
     time_t now = time(0);
     tm* localTime = localtime(&now);
@@ -22,19 +23,22 @@ string getCurrentTime() {
     return string(buffer);
 }
 
+//Send message user
 void message(const char* msg,int senderSocket,int clientSocket = -1){
-
     sockaddr_in clientAddress;
     socklen_t clientAddrLen = sizeof(clientAddress);
     getpeername(senderSocket, (struct sockaddr*)&clientAddress, &clientAddrLen);
 
+    //form message to contain sender
     ostringstream oss;
     oss << clients[senderSocket] <<": "<< msg;
     string formattedMessage = oss.str();
+    //Don't modify if the message is made by server or the message is online message
     if(senderSocket!=0 && clientSocket!=-1){
         msg = formattedMessage.c_str();
     }
 
+    //Broadcast message to everyone except the sender itself
     if (clientSocket==-1){
         for(int cs : clientSockets){
             if(cs!=senderSocket){
@@ -46,9 +50,11 @@ void message(const char* msg,int senderSocket,int clientSocket = -1){
             exit(0);
         }
     }
+    //Send success message and all existing user
     else if(strcmp(msg,"<Success>")==0){
         send(clientSocket,msg,strlen(msg),0);
         usleep(100000);
+        //list of existing user except itself
         for(int cs : clientSockets){
             if(cs!=clientSocket){
                 sockaddr_in clientAddress;
@@ -62,24 +68,31 @@ void message(const char* msg,int senderSocket,int clientSocket = -1){
             }
         }
     }
+    //send message from one to another
     else{
         send(clientSocket,msg,strlen(msg),0);
     }
 }
 
+//Handle client through socket
 void* handleClient(void* arg) {
     int clientSocket = *(int*)arg;
     delete (int*)arg;
 
+    //get client info through socket
     sockaddr_in clientAddress;
     socklen_t clientAddrLen = sizeof(clientAddress);
     getpeername(clientSocket, (struct sockaddr*)&clientAddress, &clientAddrLen);
-
+    
+    //add user to list
     clientSockets.push_back(clientSocket);
 
+    //while connecting keep receiving message and process
     while (true) {
         char buffer[1024] = {0};
         int bytesReceived = recv(clientSocket, buffer, sizeof(buffer), 0);
+
+        //if disconnected or bye is sent write whiteboard broacast and stop receving message
         if (bytesReceived == 0||strcmp(buffer, "$ bye") == 0) {
             string msg ="<User " + clients[clientSocket] + " disconnected>";
             {lock_guard<mutex> lock(wbMutex);
@@ -89,7 +102,10 @@ void* handleClient(void* arg) {
             message(msg.c_str(),clientSocket);
             break;
         }
+
+        //if receive other message
         else if (bytesReceived > 0) {
+            //case of connect message
             if(strncmp(buffer,"$ connect",9)==0){
                 stringstream ss;
                 ss<<buffer;
@@ -99,10 +115,13 @@ void* handleClient(void* arg) {
                                   [&name](const pair<int, string>& client) {
                                       return client.second == name;
                                   });
+
+                //if the name already exist end connection
                 if (it != clients.end()) {
                     message("<User already exist>",0,clientSocket);
                     break;
                 }
+                //else store name and broadcast about new user
                 else {
                     clients[clientSocket]=name;
                     {lock_guard<mutex> lock(wbMutex);
@@ -121,6 +140,7 @@ void* handleClient(void* arg) {
                     message(msg.c_str(),clientSocket);
                 }
             }
+            //case of chat other user
             else if(strncmp(buffer, "$ chat", 6) == 0) {
                 stringstream ss(buffer);
                 string command, recipient, msg;
@@ -142,23 +162,30 @@ void* handleClient(void* arg) {
                                   [&recipient](const pair<int, string>& client) {
                                       return client.second == recipient;
                                   });
+                //check if the recipient exist
                 if (it != clients.end()) {
                     int recipientSocket = it->first;
                     message(msg.c_str(), clientSocket, recipientSocket);
-                }else {
+                }
+                //throw error if not
+                else {
                     string errorMsg = "<User "+recipient+" does not exist>";
                     message(errorMsg.c_str(),0,clientSocket);
                 }
             }
+            //case of kill message
             else if(strcmp(buffer,"kill")==0){
                 message("<Kill>",0);
             }
         }
+
+        //other cases
         else{
             cerr << "recv failed" << endl;
             break;
         }
     }
+    //after disconnect close socket and erase existence
     close(clientSocket);
     clientSockets.erase(remove(clientSockets.begin()
                         ,clientSockets.end(),clientSocket),clientSockets.end());
@@ -167,18 +194,24 @@ void* handleClient(void* arg) {
 }
 
 int main() {
+    //set user 0 to server
     clients[0]="Server";
+
+    //create socket
     int serverSocket = socket(AF_INET, SOCK_STREAM, 0);
     if (serverSocket == -1) {
         cerr << "Socket creation failed" << endl;
         return 1;
     }
-
+    
+    //make the port reusable
     int opt = 1;
     if (setsockopt(serverSocket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) {
         cerr << "setsockopt(SO_REUSEADDR) failed" << endl;
         return 1;
     }
+
+    //bind socket with given address and port
     string add;
     int port=8080;
     sockaddr_in serverAddress;
@@ -193,8 +226,8 @@ int main() {
         cerr<<"Bind failed" << endl;
         return 1;
     }
-    
 
+    //write init message to whiteboard
     {lock_guard<mutex> lock(wbMutex);
     string wbmsg = " <IP: " + string(inet_ntoa(serverAddress.sin_addr)) 
                    + " Port: " + to_string(ntohs(serverAddress.sin_port)) + ">\n";
@@ -202,25 +235,28 @@ int main() {
     system("clear");
     cout<<whiteboard;}
     
-    
+    //allow user to connect
     if (listen(serverSocket, 5) < 0) {
         cerr << "Listen failed" << endl;
         return 1;
     }
-        
+    
+    //case of connection formed
     while (true) {
         sockaddr_in clientAddress;
         socklen_t clientAddrLen = sizeof(clientAddress);
         int clientSocket=accept(serverSocket,
                                 (struct sockaddr*)&clientAddress, &clientAddrLen);
         
+        //if user connection failed
         if (clientSocket < 0) {
             cerr << "Accept failed" << endl;
             continue;
-        }        
+        }
+
+        //create thread to hold connection
         pthread_t thread;
         int* clientSocketPtr = new int(clientSocket);
-        
         if (pthread_create(&thread, nullptr, handleClient, clientSocketPtr) != 0) {
             cerr << "Thread creation failed" << endl;
             delete clientSocketPtr;
@@ -229,6 +265,7 @@ int main() {
         }
         pthread_detach(thread);
     }
+    //shut down socket
     close(serverSocket);
     return 0;
 }
