@@ -11,6 +11,7 @@ using namespace std;
 
 vector<int> clientSockets;  //list of existing client
 map<int,string> clients;    //client name
+vector<string> offline;     //offline user
 mutex wbMutex;              //whiteboard mutex
 string whiteboard;          //whiteboard
 
@@ -20,7 +21,8 @@ string getCurrentTime() {
     tm* localTime = localtime(&now);
     char buffer[80];
     strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", localTime);
-    return string(buffer);
+    string rt = "["+string(buffer)+"]";
+    return rt;
 }
 
 //Send message user
@@ -60,7 +62,7 @@ void message(const char* msg,int senderSocket,int clientSocket = -1){
                 sockaddr_in clientAddress;
                 socklen_t clientAddrLen = sizeof(clientAddress);
                 getpeername(cs, (struct sockaddr*)&clientAddress, &clientAddrLen);
-                string msg = "<User " + clients[cs] + " is online, address: " 
+                string msg = "<User " + clients[cs] + " is on-line, socket address: " 
                                 + string(inet_ntoa(clientAddress.sin_addr))
                                 + "/" + to_string(ntohs(clientAddress.sin_port))+">";
                 send(clientSocket,msg.c_str(),strlen(msg.c_str()),0);
@@ -94,9 +96,10 @@ void* handleClient(void* arg) {
 
         //if disconnected or bye is sent write whiteboard broacast and stop receving message
         if (bytesReceived == 0||strcmp(buffer, "$ bye") == 0) {
-            string msg ="<User " + clients[clientSocket] + " disconnected>";
+            string msg ="<User " + clients[clientSocket] + " is off-line>";
+            string wbmsg="<Client " + clients[clientSocket] + " disconnected>";
             {lock_guard<mutex> lock(wbMutex);
-            whiteboard+=(getCurrentTime()+" "+msg+"\n");
+            whiteboard+=(getCurrentTime()+" "+wbmsg+"\n");
             system("clear");
             cout<<whiteboard;}
             message(msg.c_str(),clientSocket);
@@ -133,7 +136,7 @@ void* handleClient(void* arg) {
                     cout<<whiteboard;}
                     message("<Success>",0,clientSocket);
                     stringstream ss;
-                    ss << "<User " << name << " is online, address: " 
+                    ss << "<User " << name << " is on-line, address: " 
                        << inet_ntoa(clientAddress.sin_addr)
                        << "/" << ntohs(clientAddress.sin_port)<<">";
                     string msg = ss.str();
@@ -153,8 +156,8 @@ void* handleClient(void* arg) {
                     msg = msg.substr(1, msg.size() - 2);
                 }
                 {lock_guard<mutex> lock(wbMutex);
-                string wbmsg = getCurrentTime() + " <" + clients[clientSocket] + " to " 
-                               + recipient + "> Message: " + msg + "\n";
+                string wbmsg = getCurrentTime() +" "+ clients[clientSocket] + " is using the whiteboard.\n<To "
+                              +recipient+"> "+msg+"\n";
                 whiteboard+=wbmsg;
                 system("clear");
                 cout << whiteboard;}
@@ -166,6 +169,11 @@ void* handleClient(void* arg) {
                 if (it != clients.end()) {
                     int recipientSocket = it->first;
                     message(msg.c_str(), clientSocket, recipientSocket);
+                }
+                //check if recipient is offline
+                else if (find(offline.begin(), offline.end(), recipient) != offline.end()) {
+                    string offlineMsg = "<User " + recipient + " is off-line>";
+                    message(offlineMsg.c_str(), 0, clientSocket);
                 }
                 //throw error if not
                 else {
@@ -186,6 +194,7 @@ void* handleClient(void* arg) {
         }
     }
     //after disconnect close socket and erase existence
+    offline.push_back(clients[clientSocket]);
     close(clientSocket);
     clientSockets.erase(remove(clientSockets.begin()
                         ,clientSockets.end(),clientSocket),clientSockets.end());

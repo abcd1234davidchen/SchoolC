@@ -12,18 +12,17 @@ Each output besides Init wipe terminal then write to whiteboard and output white
 |---|---|---|
 |Init|`input <address> <port>`|input {address} {port}|
 |Init Success|`<IP: {address} Port: {port}>`||
-|Connect|`<Client {name} on address: {address}/{port}>`|1. open thread 2. check if username already exist <br> 3. send `<User {name} is on-line, address: {address}/{port}>` to all online client <br> 4. send `<Success>` and current online user list `<User {name} is on-line, address: {address}/{port}>` to new connected also add new connected to list|
+|Connect|`<Client {name} on address: {address}/{port}>`|1. open thread 2. check if username already exist <br> 3. send `<User {name} is online, address: {address}/{port}>` to all online client <br> 4. send `<Success>` and current online user list `<User {name} is online, address: {address}/{port}>` to new connected also add new connected to list|
 |Chat|`<{sender} to {recipient}> Message: {message}`|forward message from sender to recipient <br> or throws `<User {recipient} does not exist>` to sender|
-|Disconnect|`<Client {name} disconnected>`|send `<User {name} is off-line>` to everyone, add to offline list, remove from clients list and close thread|
+|Disconnect|`<Client {name} disconnected>`|send `<User {name} disconnected>` to everyone, remove from list and close thread|
 
 ### Client
 |Command|Output|Notes|
 |---|---|---|
-|`$ connect {address} {port}`|`<Success>` <br> `<User {name} is on-line, socket address: {address}/{port}>`|Connection formed and list out online user|
+|`$ connect {address} {port}`|`<Success>` <br> `<User {name} is online, address: {address}/{port}>`|Connection formed and list out online user|
 ||`<User already exist>`|User already exist|
 |`$ chat {user} "{message}"`|blank|Success|
 ||`User {user} does not exist`|Sent to invalid user|
-||`User {user} is off-line`|Sent to offline user|
 |`$ bye`|blank|Disconnect from server|
 
 ## Idea
@@ -48,7 +47,6 @@ The whole process of an connection:
     - Server would maintain and listen connection through pthread
     - Server holds a vector of existing user
     - Server holds a map to map user name with socket
-    - Server holds a vector of offline user
     - Client would be prompted to redo connection if error occurs
     - Process:
         1. The server would throw a success message first to make client know the connection is established and change connection bool
@@ -63,7 +61,7 @@ The whole process of an connection:
      - The whiteboard is updated regardless of the existance of user
      - Process:
         1. Check if the recipient is in the server
-        - Throw error back to user if the recipient is not in map or is in offline list
+        - Throw error back to user if the recipient is not in map
         2. Message is parsed before to support both with and without quotation mark
         3. Message is sent through send command
        
