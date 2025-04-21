@@ -160,7 +160,9 @@ void* handleClient(void* arg) {
                               +recipient+"> "+msg+"\n";
                 whiteboard+=wbmsg;
                 system("clear");
-                cout << whiteboard;}
+                cout << whiteboard;
+                //sleep(5);
+                }  
                 auto it = find_if(clients.begin(), clients.end(), 
                                   [&recipient](const pair<int, string>& client) {
                                       return client.second == recipient;
