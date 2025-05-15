@@ -103,8 +103,64 @@ void preSJF(deque<process> processes){
     draw(currentProcess);
 }
 
-void npRR(){
+void npRR(deque<process> processes){
+    int currentSecond = 0;
+    deque<process> waitingQueue;
+    deque<int> currentProcess;
+    int contextSwitch=0;
+    
+    map<int,int> completionTime;
+    map<int,int> arrivalCopy;
+    map<int,int> burstCopy;
+    
+    for(size_t i=0;i<processes.size();i++){
+        arrivalCopy[processes[i].identification] = processes[i].arrival_time;
+        burstCopy[processes[i].identification] = processes[i].burst_time;
+    }
 
+    while(!processes.empty()||!waitingQueue.empty()){
+        while (!processes.empty() && processes.front().arrival_time <= currentSecond) {
+            waitingQueue.push_back(processes.front());
+            processes.pop_front();
+        }
+        sort(waitingQueue.begin(),waitingQueue.end(),compareBurstTime);
+        if(!waitingQueue.empty()){
+            int dealingProcess = waitingQueue.front().identification;
+            if(!currentProcess.empty()&&currentProcess.back() != dealingProcess){
+                contextSwitch++;
+            }
+            currentProcess.push_back(dealingProcess);
+            waitingQueue.front().burst_time-=1;
+            if( waitingQueue.front().burst_time<=0){
+                completionTime[dealingProcess]=1+currentSecond;
+                waitingQueue.pop_front();
+            }
+        }
+        else{
+            currentProcess.push_back(-1);
+        }
+        currentSecond++;
+    }
+
+    cout<<"SJF with Preemptive"<<endl<<"Context Switch Times:"<<contextSwitch<<endl;
+
+    int waitSum = completionTime[0]-arrivalCopy[0]-burstCopy[0];
+    cout<<"Waiting Time: ("<<completionTime[0]<<"-"<<arrivalCopy[0]<<"-"<<burstCopy[0]<<")";
+    for(int i=1;i<static_cast<int>(completionTime.size());i++){
+        cout<<"+("<<completionTime[i]<<"-"<<arrivalCopy[i]<<"-"<<burstCopy[i]<<")";
+        waitSum+=completionTime[i]-arrivalCopy[i]-burstCopy[i];
+    }
+    cout<<"="<<waitSum<<endl;
+
+    int turnSum = completionTime[0]-arrivalCopy[0];
+    cout<<"Turnaround Time: ("<<completionTime[0]<<"-"<<arrivalCopy[0]<<")";
+    for(int i=1;i<static_cast<int>(completionTime.size());i++){
+        cout<<"+("<<completionTime[i]<<"-"<<arrivalCopy[i]<<")";
+        turnSum+=completionTime[i]-arrivalCopy[i];
+    }
+    cout<<"="<<turnSum<<endl;
+
+    draw(currentProcess);
 }
 
 void multilevelFeedbackQueue(){
