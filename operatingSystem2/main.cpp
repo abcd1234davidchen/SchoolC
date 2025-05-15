@@ -82,7 +82,7 @@ void preSJF(deque<process> processes){
         currentSecond++;
     }
 
-    cout<<"SJF with Preemptive"<<endl<<"Context Switch Times:"<<contextSwitch<<endl;
+    cout<<"Preemptive SJF"<<endl<<"Context Switch Times:"<<contextSwitch<<endl;
 
     int waitSum = completionTime[0]-arrivalCopy[0]-burstCopy[0];
     cout<<"Waiting Time: ("<<completionTime[0]<<"-"<<arrivalCopy[0]<<"-"<<burstCopy[0]<<")";
@@ -103,37 +103,77 @@ void preSJF(deque<process> processes){
     draw(currentProcess);
 }
 
+bool comparePriority(const process& A,const process& B){
+    return A.priority<B.priority;
+}
+
 void npRR(deque<process> processes){
     int currentSecond = 0;
     deque<process> waitingQueue;
+    deque<process> priorityQueue;
     deque<int> currentProcess;
     int contextSwitch=0;
     
     map<int,int> completionTime;
     map<int,int> arrivalCopy;
     map<int,int> burstCopy;
+    int quantum=0;
+    int currentPriority=0;
     
     for(size_t i=0;i<processes.size();i++){
         arrivalCopy[processes[i].identification] = processes[i].arrival_time;
         burstCopy[processes[i].identification] = processes[i].burst_time;
     }
 
-    while(!processes.empty()||!waitingQueue.empty()){
+    while(!processes.empty()||!waitingQueue.empty()||!priorityQueue.empty()){
         while (!processes.empty() && processes.front().arrival_time <= currentSecond) {
             waitingQueue.push_back(processes.front());
             processes.pop_front();
         }
-        sort(waitingQueue.begin(),waitingQueue.end(),compareBurstTime);
-        if(!waitingQueue.empty()){
-            int dealingProcess = waitingQueue.front().identification;
+        sort(waitingQueue.begin(),waitingQueue.end(),comparePriority);
+
+        if(currentPriority==0){
+            currentPriority=waitingQueue.front().priority;
+        }
+        if(currentPriority>waitingQueue.front().priority){
+            for(auto process:priorityQueue){
+                waitingQueue.push_back(process);
+                priorityQueue.pop_front();
+            }
+            for(auto process:waitingQueue){
+                if(process.priority==currentPriority){
+                    priorityQueue.push_back(process);
+                    waitingQueue.pop_front();
+                }
+            }
+        }
+        else if(currentPriority==waitingQueue.front().priority){
+            for(auto process:waitingQueue){
+                if(process.priority==currentPriority){
+                    priorityQueue.push_back(process);
+                    waitingQueue.pop_front();
+                }
+            }
+        }
+
+        if(!priorityQueue.empty()){
+            int dealingProcess = priorityQueue.front().identification;
             if(!currentProcess.empty()&&currentProcess.back() != dealingProcess){
                 contextSwitch++;
             }
             currentProcess.push_back(dealingProcess);
-            waitingQueue.front().burst_time-=1;
-            if( waitingQueue.front().burst_time<=0){
+            quantum+=1;
+            priorityQueue.front().burst_time-=1;
+            if(priorityQueue.front().burst_time<=0){
                 completionTime[dealingProcess]=1+currentSecond;
-                waitingQueue.pop_front();
+                priorityQueue.pop_front();
+                quantum=0;
+                if(priorityQueue.empty()) currentPriority=0;
+            }
+            else if(quantum==5){
+                priorityQueue.push_back(priorityQueue.front());
+                priorityQueue.pop_front();
+                quantum=0;
             }
         }
         else{
@@ -142,7 +182,7 @@ void npRR(deque<process> processes){
         currentSecond++;
     }
 
-    cout<<"SJF with Preemptive"<<endl<<"Context Switch Times:"<<contextSwitch<<endl;
+    cout<<"RR + Nonpreemptive Priority"<<endl<<"Context Switch Times:"<<contextSwitch<<endl;
 
     int waitSum = completionTime[0]-arrivalCopy[0]-burstCopy[0];
     cout<<"Waiting Time: ("<<completionTime[0]<<"-"<<arrivalCopy[0]<<"-"<<burstCopy[0]<<")";
@@ -175,5 +215,6 @@ int main(){
     srand(static_cast<unsigned int>(time(0)));
     deque<process> processes;
     init(processes);
-    preSJF(processes);
+    // preSJF(processes);
+    npRR(processes);
 }
