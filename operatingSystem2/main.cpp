@@ -1,7 +1,8 @@
 #include <iostream>
-#include <vector>
+#include <deque>
 #include <random>
 #include <algorithm>
+#include <map>
 using namespace std;
 
 struct process{
@@ -11,30 +12,102 @@ struct process{
     int priority;
 };
 
+//TODO: add align option
+void draw(deque<int> gantt,bool showDigit = true){
+    cout<<"0 1 2 3 4 5 6 7 8 9"<<endl<<"-------------------"<<endl;
+    for(size_t i=0;i<gantt.size();i++){
+        for(int j=0;j<gantt[i];j++){
+            cout<<"  ";
+        }
+        cout<<(gantt[i]>=0?(showDigit ? to_string(gantt[i]) : "█"):"")<<endl;
+    }
+}
+
 bool compareProcessArrival(const process& A,const process& B){
     return A.arrival_time<B.arrival_time;
 }
 
-void init(vector<process>& processes){
+void init(deque<process>& processes){
     for(int i=0;i<10;i++){
         processes.push_back({i,(rand()%3)*5,rand()%23+6,rand()%3+1});
     }
     sort(processes.begin(),processes.end(),compareProcessArrival);
+    cout<<"Processes: "<<endl;
     for(size_t i=0;i<10;i++){
         cout<<processes[i].identification<<" "<<processes[i].arrival_time<<" "
             <<processes[i].burst_time<<" "<<processes[i].priority<<endl;
     }
+    cout<<endl;
 }
 
-void preSJF(){
+bool compareBurstTime(const process& A,const process& B){
+    return A.burst_time<B.burst_time;
+}
 
+void preSJF(deque<process> processes){
+    int currentSecond = 0;
+    deque<process> waitingQueue;
+    deque<int> currentProcess;
+    int contextSwitch=0;
+    
+    map<int,int> completionTime;
+    map<int,int> arrivalCopy;
+    map<int,int> burstCopy;
+    for(size_t i=0;i<processes.size();i++){
+        arrivalCopy[processes[i].identification] = processes[i].arrival_time;
+        burstCopy[processes[i].identification] = processes[i].burst_time;
+    }
+
+    while(!processes.empty()||!waitingQueue.empty()){
+        while (!processes.empty() && processes.front().arrival_time <= currentSecond) {
+            waitingQueue.push_back(processes.front());
+            processes.pop_front();
+        }
+        sort(waitingQueue.begin(),waitingQueue.end(),compareBurstTime);
+        if(!waitingQueue.empty()){
+            int dealingProcess = waitingQueue.front().identification;
+            if(!currentProcess.empty()&&currentProcess.back() != dealingProcess){
+                contextSwitch++;
+            }
+            currentProcess.push_back(dealingProcess);
+            waitingQueue.front().burst_time-=1;
+            if( waitingQueue.front().burst_time<=0){
+                completionTime[dealingProcess]=1+currentSecond;
+                waitingQueue.pop_front();
+            }
+        }
+        else{
+            currentProcess.push_back(-1);
+        }
+        currentSecond++;
+    }
+
+    cout<<"SJF with Preemptive"<<endl<<"Context Switch Times:"<<contextSwitch<<endl;
+
+    int waitSum = completionTime[0]-arrivalCopy[0]-burstCopy[0];
+    cout<<"Waiting Time: ("<<completionTime[0]<<"-"<<arrivalCopy[0]<<"-"<<burstCopy[0]<<")";
+    for(int i=1;i<static_cast<int>(completionTime.size());i++){
+        cout<<"+("<<completionTime[i]<<"-"<<arrivalCopy[i]<<"-"<<burstCopy[i]<<")";
+        waitSum+=completionTime[i]-arrivalCopy[i]-burstCopy[i];
+    }
+    cout<<"="<<waitSum<<endl;
+
+    int turnSum = completionTime[0]-arrivalCopy[0];
+    cout<<"Turnaround Time: ("<<completionTime[0]<<"-"<<arrivalCopy[0]<<")";
+    for(int i=1;i<static_cast<int>(completionTime.size());i++){
+        cout<<"+("<<completionTime[i]<<"-"<<arrivalCopy[i]<<")";
+        turnSum+=completionTime[i]-arrivalCopy[i];
+    }
+    cout<<"="<<turnSum<<endl;
+
+    draw(currentProcess);
 }
 
 void npRR(){
 
 }
 
-void multilevelQueue(){
+void multilevelFeedbackQueue(){
 
 }
 
@@ -43,7 +116,8 @@ void custom(){
 }
 
 int main(){
-    srand(time(0));
-    vector<process> processes;
+    srand(static_cast<unsigned int>(time(0)));
+    deque<process> processes;
     init(processes);
+    preSJF(processes);
 }
