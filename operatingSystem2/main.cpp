@@ -1,6 +1,5 @@
 #include <iostream>
 #include <deque>
-#include <random>
 #include <algorithm>
 #include <map>
 using namespace std;
@@ -12,7 +11,15 @@ struct process{
     int priority;
 };
 
-//TODO: add align option
+struct algoMetadata{
+    string name;
+    int contextSwitch;
+    map<int,int> completionTime;
+    map<int,int> arrivalCopy;
+    map<int,int> burstCopy;
+    deque<int> currentProcess;
+};
+
 void draw(deque<int> gantt,bool showDigit = true){
     cout<<"0 1 2 3 4 5 6 7 8 9"<<endl<<"-------------------"<<endl;
     for(size_t i=0;i<gantt.size();i++){
@@ -21,6 +28,30 @@ void draw(deque<int> gantt,bool showDigit = true){
         }
         cout<<(gantt[i]>=0?(showDigit ? to_string(gantt[i]) : "█"):"")<<endl;
     }
+}
+
+void algoShare(algoMetadata algo){
+    cout<<algo.name<<endl<<"Context Switch Times:"<<algo.contextSwitch<<endl;
+
+    int waitSum = algo.completionTime[0]-algo.arrivalCopy[0]-algo.burstCopy[0];
+    cout<<"Waiting Time: ("<<algo.completionTime[0]<<"-"
+        <<algo.arrivalCopy[0]<<"-"<<algo.burstCopy[0]<<")";
+    for(int i=1;i<static_cast<int>(algo.completionTime.size());i++){
+        cout<<"+("<<algo.completionTime[i]<<"-"
+            <<algo.arrivalCopy[i]<<"-"<<algo.burstCopy[i]<<")";
+        waitSum+=algo.completionTime[i]-algo.arrivalCopy[i]-algo.burstCopy[i];
+    }
+    cout<<"="<<waitSum<<endl;
+
+    int turnSum = algo.completionTime[0]-algo.arrivalCopy[0];
+    cout<<"Turnaround Time: ("<<algo.completionTime[0]<<"-"<<algo.arrivalCopy[0]<<")";
+    for(int i=1;i<static_cast<int>(algo.completionTime.size());i++){
+        cout<<"+("<<algo.completionTime[i]<<"-"<<algo.arrivalCopy[i]<<")";
+        turnSum+=algo.completionTime[i]-algo.arrivalCopy[i];
+    }
+    cout<<"="<<turnSum<<endl;
+
+    draw(algo.currentProcess);
 }
 
 bool compareProcessArrival(const process& A,const process& B){
@@ -82,26 +113,9 @@ void preSJF(deque<process> processes){
         currentSecond++;
     }
 
-    cout<<"Preemptive SJF"<<endl<<"Context Switch Times:"<<contextSwitch<<endl;
-
-    int waitSum = completionTime[0]-arrivalCopy[0]-burstCopy[0];
-    cout<<"Waiting Time: ("<<completionTime[0]<<"-"
-        <<arrivalCopy[0]<<"-"<<burstCopy[0]<<")";
-    for(int i=1;i<static_cast<int>(completionTime.size());i++){
-        cout<<"+("<<completionTime[i]<<"-"<<arrivalCopy[i]<<"-"<<burstCopy[i]<<")";
-        waitSum+=completionTime[i]-arrivalCopy[i]-burstCopy[i];
-    }
-    cout<<"="<<waitSum<<endl;
-
-    int turnSum = completionTime[0]-arrivalCopy[0];
-    cout<<"Turnaround Time: ("<<completionTime[0]<<"-"<<arrivalCopy[0]<<")";
-    for(int i=1;i<static_cast<int>(completionTime.size());i++){
-        cout<<"+("<<completionTime[i]<<"-"<<arrivalCopy[i]<<")";
-        turnSum+=completionTime[i]-arrivalCopy[i];
-    }
-    cout<<"="<<turnSum<<endl;
-
-    draw(currentProcess);
+    algoShare({"Multilevel feedback queue",
+                contextSwitch,completionTime,
+                arrivalCopy,burstCopy,currentProcess});
 }
 
 bool comparePriority(const process& A,const process& B){
@@ -183,28 +197,9 @@ void npRR(deque<process> processes){
         currentSecond++;
     }
 
-    cout<<"RR + Nonpreemptive Priority"
-        <<endl<<"Context Switch Times:"<<contextSwitch<<endl;
-
-    int waitSum = completionTime[0]-arrivalCopy[0]-burstCopy[0];
-    cout<<"Waiting Time: ("<<completionTime[0]<<"-"
-        <<arrivalCopy[0]<<"-"<<burstCopy[0]<<")";
-    for(int i=1;i<static_cast<int>(completionTime.size());i++){
-        cout<<"+("<<completionTime[i]<<"-"
-            <<arrivalCopy[i]<<"-"<<burstCopy[i]<<")";
-        waitSum+=completionTime[i]-arrivalCopy[i]-burstCopy[i];
-    }
-    cout<<"="<<waitSum<<endl;
-
-    int turnSum = completionTime[0]-arrivalCopy[0];
-    cout<<"Turnaround Time: ("<<completionTime[0]<<"-"<<arrivalCopy[0]<<")";
-    for(int i=1;i<static_cast<int>(completionTime.size());i++){
-        cout<<"+("<<completionTime[i]<<"-"<<arrivalCopy[i]<<")";
-        turnSum+=completionTime[i]-arrivalCopy[i];
-    }
-    cout<<"="<<turnSum<<endl;
-
-    draw(currentProcess);
+    algoShare({"Multilevel feedback queue",
+                contextSwitch,completionTime,
+                arrivalCopy,burstCopy,currentProcess});
 }
 
 void mulFQ(deque<process> processes){
@@ -263,27 +258,9 @@ void mulFQ(deque<process> processes){
         currentSecond++;
     }
 
-    cout<<"Multilevel feedback queue"<<endl<<"Context Switch Times:"<<contextSwitch<<endl;
-
-    int waitSum = completionTime[0]-arrivalCopy[0]-burstCopy[0];
-    cout<<"Waiting Time: ("<<completionTime[0]<<"-"
-        <<arrivalCopy[0]<<"-"<<burstCopy[0]<<")";
-    for(int i=1;i<static_cast<int>(completionTime.size());i++){
-        cout<<"+("<<completionTime[i]<<"-"
-            <<arrivalCopy[i]<<"-"<<burstCopy[i]<<")";
-        waitSum+=completionTime[i]-arrivalCopy[i]-burstCopy[i];
-    }
-    cout<<"="<<waitSum<<endl;
-
-    int turnSum = completionTime[0]-arrivalCopy[0];
-    cout<<"Turnaround Time: ("<<completionTime[0]<<"-"<<arrivalCopy[0]<<")";
-    for(int i=1;i<static_cast<int>(completionTime.size());i++){
-        cout<<"+("<<completionTime[i]<<"-"<<arrivalCopy[i]<<")";
-        turnSum+=completionTime[i]-arrivalCopy[i];
-    }
-    cout<<"="<<turnSum<<endl;
-
-    draw(currentProcess);
+    algoShare({"Multilevel feedback queue",
+                contextSwitch,completionTime,
+                arrivalCopy,burstCopy,currentProcess});
 }
 
 void custom(){
@@ -294,7 +271,7 @@ int main(){
     srand(static_cast<unsigned int>(time(0)));
     deque<process> processes;
     init(processes);
-    // preSJF(processes);
-    // npRR(processes);
+    preSJF(processes);
+    npRR(processes);
     mulFQ(processes);
 }
