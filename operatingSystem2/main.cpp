@@ -66,7 +66,7 @@ void preSJF(deque<process> processes){
         sort(waitingQueue.begin(),waitingQueue.end(),compareBurstTime);
         if(!waitingQueue.empty()){
             int dealingProcess = waitingQueue.front().identification;
-            if(!currentProcess.empty()&&currentProcess.back() != dealingProcess){
+            if(!currentProcess.empty()&&currentProcess.back()!=dealingProcess){
                 contextSwitch++;
             }
             currentProcess.push_back(dealingProcess);
@@ -85,7 +85,8 @@ void preSJF(deque<process> processes){
     cout<<"Preemptive SJF"<<endl<<"Context Switch Times:"<<contextSwitch<<endl;
 
     int waitSum = completionTime[0]-arrivalCopy[0]-burstCopy[0];
-    cout<<"Waiting Time: ("<<completionTime[0]<<"-"<<arrivalCopy[0]<<"-"<<burstCopy[0]<<")";
+    cout<<"Waiting Time: ("<<completionTime[0]<<"-"
+        <<arrivalCopy[0]<<"-"<<burstCopy[0]<<")";
     for(int i=1;i<static_cast<int>(completionTime.size());i++){
         cout<<"+("<<completionTime[i]<<"-"<<arrivalCopy[i]<<"-"<<burstCopy[i]<<")";
         waitSum+=completionTime[i]-arrivalCopy[i]-burstCopy[i];
@@ -182,12 +183,15 @@ void npRR(deque<process> processes){
         currentSecond++;
     }
 
-    cout<<"RR + Nonpreemptive Priority"<<endl<<"Context Switch Times:"<<contextSwitch<<endl;
+    cout<<"RR + Nonpreemptive Priority"
+        <<endl<<"Context Switch Times:"<<contextSwitch<<endl;
 
     int waitSum = completionTime[0]-arrivalCopy[0]-burstCopy[0];
-    cout<<"Waiting Time: ("<<completionTime[0]<<"-"<<arrivalCopy[0]<<"-"<<burstCopy[0]<<")";
+    cout<<"Waiting Time: ("<<completionTime[0]<<"-"
+        <<arrivalCopy[0]<<"-"<<burstCopy[0]<<")";
     for(int i=1;i<static_cast<int>(completionTime.size());i++){
-        cout<<"+("<<completionTime[i]<<"-"<<arrivalCopy[i]<<"-"<<burstCopy[i]<<")";
+        cout<<"+("<<completionTime[i]<<"-"
+            <<arrivalCopy[i]<<"-"<<burstCopy[i]<<")";
         waitSum+=completionTime[i]-arrivalCopy[i]-burstCopy[i];
     }
     cout<<"="<<waitSum<<endl;
@@ -203,8 +207,83 @@ void npRR(deque<process> processes){
     draw(currentProcess);
 }
 
-void multilevelFeedbackQueue(){
+void mulFQ(deque<process> processes){
+    int currentSecond = 0;
+    deque<process> waitingQueue;
+    deque<process> rejoinQueue;
+    deque<int> currentProcess;
+    int contextSwitch=0;
+    
+    map<int,int> completionTime;
+    map<int,int> arrivalCopy;
+    map<int,int> burstCopy;
+    int quantum=0;
+    int currentQueue=1;
+    
+    for(size_t i=0;i<processes.size();i++){
+        arrivalCopy[processes[i].identification] = processes[i].arrival_time;
+        burstCopy[processes[i].identification] = processes[i].burst_time;
+    }
 
+    while(!processes.empty()||!waitingQueue.empty()||!rejoinQueue.empty()){
+        while (!processes.empty() && processes.front().arrival_time <= currentSecond) {
+            waitingQueue.push_back(processes.front());
+            processes.pop_front();
+        }
+
+        if(!waitingQueue.empty()){
+            int dealingProcess = waitingQueue.front().identification;
+            if(!currentProcess.empty()&&currentProcess.back() != dealingProcess){
+                contextSwitch++;
+            }
+            currentProcess.push_back(dealingProcess);
+            quantum+=1;
+            waitingQueue.front().burst_time-=1;
+            if(waitingQueue.front().burst_time<=0){
+                completionTime[dealingProcess]=1+currentSecond;
+                waitingQueue.pop_front();
+                quantum=0;
+            }
+            else if((currentQueue==1&&quantum==5)||(currentQueue==2&&quantum==10)){
+                rejoinQueue.push_back(waitingQueue.front());
+                waitingQueue.pop_front();
+                quantum=0;
+            }
+            if(waitingQueue.empty()){
+                for(auto process:rejoinQueue){
+                    waitingQueue.push_back(process);
+                    rejoinQueue.pop_front();
+                }
+                currentQueue+=1;
+            }
+        }
+        else{
+            currentProcess.push_back(-1);
+        }
+        currentSecond++;
+    }
+
+    cout<<"Multilevel feedback queue"<<endl<<"Context Switch Times:"<<contextSwitch<<endl;
+
+    int waitSum = completionTime[0]-arrivalCopy[0]-burstCopy[0];
+    cout<<"Waiting Time: ("<<completionTime[0]<<"-"
+        <<arrivalCopy[0]<<"-"<<burstCopy[0]<<")";
+    for(int i=1;i<static_cast<int>(completionTime.size());i++){
+        cout<<"+("<<completionTime[i]<<"-"
+            <<arrivalCopy[i]<<"-"<<burstCopy[i]<<")";
+        waitSum+=completionTime[i]-arrivalCopy[i]-burstCopy[i];
+    }
+    cout<<"="<<waitSum<<endl;
+
+    int turnSum = completionTime[0]-arrivalCopy[0];
+    cout<<"Turnaround Time: ("<<completionTime[0]<<"-"<<arrivalCopy[0]<<")";
+    for(int i=1;i<static_cast<int>(completionTime.size());i++){
+        cout<<"+("<<completionTime[i]<<"-"<<arrivalCopy[i]<<")";
+        turnSum+=completionTime[i]-arrivalCopy[i];
+    }
+    cout<<"="<<turnSum<<endl;
+
+    draw(currentProcess);
 }
 
 void custom(){
@@ -216,5 +295,6 @@ int main(){
     deque<process> processes;
     init(processes);
     // preSJF(processes);
-    npRR(processes);
+    // npRR(processes);
+    mulFQ(processes);
 }
