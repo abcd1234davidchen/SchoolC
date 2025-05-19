@@ -2,6 +2,7 @@
 #include <deque>
 #include <algorithm>
 #include <map>
+#include <iomanip>
 using namespace std;
 
 struct process{
@@ -30,6 +31,29 @@ void draw(deque<int> gantt,bool showDigit = true){
     }
 }
 
+deque<deque<int>> gantts;
+
+void multipleDraw(bool showDigit = true){
+    cout<<"time";
+    for(size_t i=0;i<gantts.size();i++){
+        cout<<"|0 1 2 3 4 5 6 7 8 9";
+    }
+    cout<<endl<<"    ";
+    for(size_t i=0;i<gantts.size();i++){
+        cout<<"|-------------------";
+    }
+    cout<<endl;
+    for(size_t i=0;i<gantts[0].size();i++){
+        cout<<right<<setw(4)<<i;
+        for(size_t j=0;j<gantts.size();j++){
+            for(size_t k=0;k<10;k++){
+                cout<<((k==0)?"|":" ")<<((gantts[j][i]!=static_cast<int>(k))?" ":(showDigit ? to_string(gantts[j][i]) : "█"));
+            }
+        }
+        cout<<endl;
+    }
+}
+
 void algoShare(algoMetadata algo){
     cout<<algo.name<<endl<<"Context Switch Times:"<<algo.contextSwitch<<endl;
 
@@ -50,8 +74,9 @@ void algoShare(algoMetadata algo){
         turnSum+=algo.completionTime[i]-algo.arrivalCopy[i];
     }
     cout<<"="<<turnSum<<endl;
-
-    draw(algo.currentProcess);
+    
+    gantts.push_back(algo.currentProcess);
+    // draw(algo.currentProcess);
 }
 
 bool compareProcessArrival(const process& A,const process& B){
@@ -113,7 +138,7 @@ void preSJF(deque<process> processes){
         currentSecond++;
     }
 
-    algoShare({"Multilevel feedback queue",
+    algoShare({"Preemptive SJF",
                 contextSwitch,completionTime,
                 arrivalCopy,burstCopy,currentProcess});
 }
@@ -147,26 +172,28 @@ void npRR(deque<process> processes){
         }
         sort(waitingQueue.begin(),waitingQueue.end(),comparePriority);
 
-        if(currentPriority==0){
-            currentPriority=waitingQueue.front().priority;
-        }
-        if(currentPriority>waitingQueue.front().priority){
-            for(auto process:priorityQueue){
-                waitingQueue.push_back(process);
-                priorityQueue.pop_front();
+        if(!waitingQueue.empty()){
+            if(currentPriority==0){
+                currentPriority=waitingQueue.front().priority;
             }
-            for(auto process:waitingQueue){
-                if(process.priority==currentPriority){
-                    priorityQueue.push_back(process);
-                    waitingQueue.pop_front();
+            if(currentPriority>waitingQueue.front().priority){
+                for(auto process:priorityQueue){
+                    waitingQueue.push_back(process);
+                    priorityQueue.pop_front();
+                }
+                for(auto process:waitingQueue){
+                    if(process.priority==currentPriority){
+                        priorityQueue.push_back(process);
+                        waitingQueue.pop_front();
+                    }
                 }
             }
-        }
-        else if(currentPriority==waitingQueue.front().priority){
-            for(auto process:waitingQueue){
-                if(process.priority==currentPriority){
-                    priorityQueue.push_back(process);
-                    waitingQueue.pop_front();
+            else if(currentPriority==waitingQueue.front().priority){
+                for(auto process:waitingQueue){
+                    if(process.priority==currentPriority){
+                        priorityQueue.push_back(process);
+                        waitingQueue.pop_front();
+                    }
                 }
             }
         }
@@ -197,7 +224,7 @@ void npRR(deque<process> processes){
         currentSecond++;
     }
 
-    algoShare({"Multilevel feedback queue",
+    algoShare({"RR + Nonpreemptive Priority",
                 contextSwitch,completionTime,
                 arrivalCopy,burstCopy,currentProcess});
 }
@@ -263,8 +290,68 @@ void mulFQ(deque<process> processes){
                 arrivalCopy,burstCopy,currentProcess});
 }
 
-void custom(){
+void sortWQByVrt(deque<process>& waitingQueue, const map<int, int>& vruntime) {
+    vector<process> temp(waitingQueue.begin(), waitingQueue.end());
 
+    sort(temp.begin(), temp.end(), [&](const process& a, const process& b) {
+        return vruntime.at(a.identification) < vruntime.at(b.identification);
+    });
+
+    waitingQueue = deque<process>(temp.begin(), temp.end());
+}
+
+void CFS(deque<process> processes){
+    int currentSecond = 0;
+    deque<process> waitingQueue;
+    deque<int> currentProcess;
+    int contextSwitch=0;
+    int processRuntime=0;
+    int dealingProcess=0;
+    
+    map<int,int> vruntime;
+    map<int,int> completionTime;
+    map<int,int> arrivalCopy;
+    map<int,int> burstCopy;
+    for(size_t i=0;i<processes.size();i++){
+        arrivalCopy[processes[i].identification] = processes[i].arrival_time;
+        burstCopy[processes[i].identification] = processes[i].burst_time;
+    }
+    while(!processes.empty()||!waitingQueue.empty()){
+        while (!processes.empty() &&
+                processes.front().arrival_time <= currentSecond) {
+            waitingQueue.push_back(processes.front());
+            vruntime[processes.front().identification] = 0;
+            processes.pop_front();
+        }          
+        if(processRuntime==0 || processRuntime>4){
+            sortWQByVrt(waitingQueue,vruntime); 
+            if(!waitingQueue.empty()&&dealingProcess!=waitingQueue.front().identification){
+                contextSwitch+=1;
+                processRuntime=0;
+                dealingProcess = waitingQueue.front().identification;
+            }
+        }
+        if(!waitingQueue.empty()){
+            vruntime[dealingProcess]+=waitingQueue.front().priority;
+            processRuntime+=1;
+            currentProcess.push_back(dealingProcess);
+            waitingQueue.front().burst_time-=1;
+            if( waitingQueue.front().burst_time<=0){
+                completionTime[dealingProcess]=1+currentSecond;
+                waitingQueue.pop_front();
+                vruntime.erase(dealingProcess);
+                processRuntime=0;
+            }
+        }
+        else{
+            currentProcess.push_back(-1);
+        }
+        currentSecond++;
+    }
+
+    algoShare({"CFS",
+                contextSwitch,completionTime,
+                arrivalCopy,burstCopy,currentProcess});
 }
 
 int main(){
@@ -272,6 +359,12 @@ int main(){
     deque<process> processes;
     init(processes);
     preSJF(processes);
+    cout<<endl<<endl;
     npRR(processes);
+    cout<<endl<<endl;
     mulFQ(processes);
+    cout<<endl<<endl;
+    CFS(processes);
+    cout<<endl<<endl;
+    multipleDraw();
 }
