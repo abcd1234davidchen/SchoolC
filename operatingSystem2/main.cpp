@@ -1,5 +1,6 @@
 #include <iostream>
 #include <deque>
+#include <vector>
 #include <algorithm>
 #include <map>
 #include <iomanip>
@@ -12,7 +13,7 @@ struct process{
     int priority;
 };
 
-struct algoMetadata{
+struct algoMetadata{ // The metadata for algorithm to run
     string name;
     int contextSwitch;
     map<int,int> completionTime;
@@ -22,6 +23,7 @@ struct algoMetadata{
 };
 
 void draw(deque<int> gantt,bool showDigit = true){
+    // Draw function for only one process
     cout<<"0 1 2 3 4 5 6 7 8 9"<<endl<<"-------------------"<<endl;
     for(size_t i=0;i<gantt.size();i++){
         for(int j=0;j<gantt[i];j++){
@@ -31,9 +33,10 @@ void draw(deque<int> gantt,bool showDigit = true){
     }
 }
 
-deque<deque<int>> gantts;
+deque<deque<int>> gantts; //keep track of all gantts to draw later
 
 void multipleDraw(bool showDigit = true){
+    // Draw processes side by side according to number of algorithms
     cout<<"time";
     for(size_t i=0;i<gantts.size();i++){
         cout<<"|0 1 2 3 4 5 6 7 8 9";
@@ -55,8 +58,9 @@ void multipleDraw(bool showDigit = true){
 }
 
 void algoShare(algoMetadata algo){
+    //Take info about algorithm and format the print
     cout<<algo.name<<endl<<"Context Switch Times:"<<algo.contextSwitch<<endl;
-
+    //The waiting time is complete-arrival-burst
     int waitSum = algo.completionTime[0]-algo.arrivalCopy[0]-algo.burstCopy[0];
     cout<<"Waiting Time: ("<<algo.completionTime[0]<<"-"
         <<algo.arrivalCopy[0]<<"-"<<algo.burstCopy[0]<<")";
@@ -66,7 +70,7 @@ void algoShare(algoMetadata algo){
         waitSum+=algo.completionTime[i]-algo.arrivalCopy[i]-algo.burstCopy[i];
     }
     cout<<"="<<waitSum<<endl;
-
+    //The turnaround time is complete-arrival
     int turnSum = algo.completionTime[0]-algo.arrivalCopy[0];
     cout<<"Turnaround Time: ("<<algo.completionTime[0]<<"-"<<algo.arrivalCopy[0]<<")";
     for(int i=1;i<static_cast<int>(algo.completionTime.size());i++){
@@ -87,6 +91,7 @@ void init(deque<process>& processes){
     for(int i=0;i<10;i++){
         processes.push_back({i,(rand()%3)*5,rand()%23+6,rand()%3+1});
     }
+    //The process is sorted with the arrival time
     sort(processes.begin(),processes.end(),compareProcessArrival);
     cout<<"Processes: "<<endl;
     for(size_t i=0;i<10;i++){
@@ -106,6 +111,7 @@ void preSJF(deque<process> processes){
     deque<int> currentProcess;
     int contextSwitch=0;
     
+    //keep track of completion time and keep a copy of arrival and burst time
     map<int,int> completionTime;
     map<int,int> arrivalCopy;
     map<int,int> burstCopy;
@@ -113,15 +119,18 @@ void preSJF(deque<process> processes){
         arrivalCopy[processes[i].identification] = processes[i].arrival_time;
         burstCopy[processes[i].identification] = processes[i].burst_time;
     }
-
+    //Quit when all is done
     while(!processes.empty()||!waitingQueue.empty()){
+        //Insert when the time has arrived and sort by time left
         while (!processes.empty() && processes.front().arrival_time <= currentSecond) {
             waitingQueue.push_back(processes.front());
             processes.pop_front();
         }
         sort(waitingQueue.begin(),waitingQueue.end(),compareBurstTime);
+        //If the queue is not empty, delete process burst time by one
         if(!waitingQueue.empty()){
             int dealingProcess = waitingQueue.front().identification;
+            //If it switches add context switch time
             if(!currentProcess.empty()&&currentProcess.back()!=dealingProcess){
                 contextSwitch++;
             }
@@ -133,11 +142,13 @@ void preSJF(deque<process> processes){
             }
         }
         else{
+            //Push back -1 if no process is in queue but not finish
             currentProcess.push_back(-1);
         }
         currentSecond++;
     }
 
+    //Do the share part
     algoShare({"Preemptive SJF",
                 contextSwitch,completionTime,
                 arrivalCopy,burstCopy,currentProcess});
@@ -154,6 +165,7 @@ void npRR(deque<process> processes){
     deque<int> currentProcess;
     int contextSwitch=0;
     
+    //keep track of completion time and keep a copy of arrival and burst time
     map<int,int> completionTime;
     map<int,int> arrivalCopy;
     map<int,int> burstCopy;
@@ -166,6 +178,7 @@ void npRR(deque<process> processes){
     }
 
     while(!processes.empty()||!waitingQueue.empty()||!priorityQueue.empty()){
+        //Insert when the time has arrived and sort by priority
         while (!processes.empty() && processes.front().arrival_time <= currentSecond) {
             waitingQueue.push_back(processes.front());
             processes.pop_front();
@@ -173,14 +186,18 @@ void npRR(deque<process> processes){
         sort(waitingQueue.begin(),waitingQueue.end(),comparePriority);
 
         if(!waitingQueue.empty()){
+            //Check the current priority
             if(currentPriority==0){
                 currentPriority=waitingQueue.front().priority;
             }
+            //Renew if priority is incorrect
             if(currentPriority>waitingQueue.front().priority){
+                //Dump back to waiting queue
                 for(auto process:priorityQueue){
                     waitingQueue.push_back(process);
                     priorityQueue.pop_front();
                 }
+                //Add highest priority to priority queue
                 for(auto process:waitingQueue){
                     if(process.priority==currentPriority){
                         priorityQueue.push_back(process);
@@ -188,6 +205,7 @@ void npRR(deque<process> processes){
                     }
                 }
             }
+            //Find if there is new undone process
             else if(currentPriority==waitingQueue.front().priority){
                 for(auto process:waitingQueue){
                     if(process.priority==currentPriority){
@@ -197,12 +215,13 @@ void npRR(deque<process> processes){
                 }
             }
         }
-
+        //If it is not empty
         if(!priorityQueue.empty()){
             int dealingProcess = priorityQueue.front().identification;
             if(!currentProcess.empty()&&currentProcess.back() != dealingProcess){
                 contextSwitch++;
             }
+            //Deduct burst time of priority queue and add quantum
             currentProcess.push_back(dealingProcess);
             quantum+=1;
             priorityQueue.front().burst_time-=1;
@@ -210,8 +229,10 @@ void npRR(deque<process> processes){
                 completionTime[dealingProcess]=1+currentSecond;
                 priorityQueue.pop_front();
                 quantum=0;
+                //Move to next priority if current is done
                 if(priorityQueue.empty()) currentPriority=0;
             }
+            //If quantum is 5 push to last
             else if(quantum==5){
                 priorityQueue.push_back(priorityQueue.front());
                 priorityQueue.pop_front();
@@ -236,6 +257,8 @@ void mulFQ(deque<process> processes){
     deque<int> currentProcess;
     int contextSwitch=0;
     
+    //keep track of completion time and keep a copy of arrival and burst time
+    //Also quantum and current queue
     map<int,int> completionTime;
     map<int,int> arrivalCopy;
     map<int,int> burstCopy;
@@ -248,6 +271,7 @@ void mulFQ(deque<process> processes){
     }
 
     while(!processes.empty()||!waitingQueue.empty()||!rejoinQueue.empty()){
+        //Push into waiting queue
         while (!processes.empty() && processes.front().arrival_time <= currentSecond) {
             waitingQueue.push_back(processes.front());
             processes.pop_front();
@@ -261,16 +285,19 @@ void mulFQ(deque<process> processes){
             currentProcess.push_back(dealingProcess);
             quantum+=1;
             waitingQueue.front().burst_time-=1;
+            //Throw away process when done
             if(waitingQueue.front().burst_time<=0){
                 completionTime[dealingProcess]=1+currentSecond;
                 waitingQueue.pop_front();
                 quantum=0;
             }
+            //Move to rejoin queue if undone in a period
             else if((currentQueue==1&&quantum==5)||(currentQueue==2&&quantum==10)){
                 rejoinQueue.push_back(waitingQueue.front());
                 waitingQueue.pop_front();
                 quantum=0;
             }
+            //Move from rejoin queue back and move to next queue
             if(waitingQueue.empty()){
                 for(auto process:rejoinQueue){
                     waitingQueue.push_back(process);
@@ -291,12 +318,11 @@ void mulFQ(deque<process> processes){
 }
 
 void sortWQByVrt(deque<process>& waitingQueue, const map<int, int>& vruntime) {
+    //Sort based on vruntime
     vector<process> temp(waitingQueue.begin(), waitingQueue.end());
-
     sort(temp.begin(), temp.end(), [&](const process& a, const process& b) {
         return vruntime.at(a.identification) < vruntime.at(b.identification);
     });
-
     waitingQueue = deque<process>(temp.begin(), temp.end());
 }
 
@@ -308,6 +334,7 @@ void CFS(deque<process> processes){
     int processRuntime=0;
     int dealingProcess=0;
     
+    //Keep track of vruntime additionally
     map<int,int> vruntime;
     map<int,int> completionTime;
     map<int,int> arrivalCopy;
@@ -322,7 +349,8 @@ void CFS(deque<process> processes){
             waitingQueue.push_back(processes.front());
             vruntime[processes.front().identification] = 0;
             processes.pop_front();
-        }          
+        }
+        //Do sort only after five quantum
         if(processRuntime==0 || processRuntime>4){
             sortWQByVrt(waitingQueue,vruntime); 
             if(!waitingQueue.empty()&&dealingProcess!=waitingQueue.front().identification){
@@ -331,11 +359,13 @@ void CFS(deque<process> processes){
                 dealingProcess = waitingQueue.front().identification;
             }
         }
+        //Add vruntime according to priority
         if(!waitingQueue.empty()){
             vruntime[dealingProcess]+=waitingQueue.front().priority;
             processRuntime+=1;
             currentProcess.push_back(dealingProcess);
             waitingQueue.front().burst_time-=1;
+            //move to next if done
             if( waitingQueue.front().burst_time<=0){
                 completionTime[dealingProcess]=1+currentSecond;
                 waitingQueue.pop_front();
