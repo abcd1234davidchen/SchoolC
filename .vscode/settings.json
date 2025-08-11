@@ -3,7 +3,6 @@
   "C_Cpp_Runner.cppCompilerPath": "clang++",
   "C_Cpp_Runner.debuggerPath": "lldb",
   "C_Cpp_Runner.cStandard": "",
-  "C_Cpp_Runner.cppStandard": "",
   "C_Cpp_Runner.msvcBatchPath": "",
   "C_Cpp_Runner.useMsvc": false,
   "C_Cpp_Runner.warnings": [
@@ -59,5 +58,6 @@
   "files.associations": {
     "*.embeddedhtml": "html",
     "iostream": "cpp"
-  }
+  },
+  "C_Cpp_Runner.cppStandard": "c++11"
 }

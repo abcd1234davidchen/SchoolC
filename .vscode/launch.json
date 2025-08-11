@@ -6,8 +6,8 @@
       "type": "lldb",
       "request": "launch",
       "args": [],
-      "cwd": "/Users/chenzhanhuang/Development/SchoolC/schoolCpp/chapter1/n1",
-      "program": "/Users/chenzhanhuang/Development/SchoolC/schoolCpp/chapter1/n1/build/Debug/outDebug"
+      "cwd": "/Users/davidchen/development/SchoolC/dataStructure/hw3",
+      "program": "/Users/davidchen/development/SchoolC/dataStructure/hw3/build/Debug/outDebug"
     }
   ]
 }
