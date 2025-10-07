@@ -6,8 +6,8 @@
       "type": "lldb",
       "request": "launch",
       "args": [],
-      "cwd": "/Users/davidchen/development/SchoolC/algorithm/hw1",
-      "program": "/Users/davidchen/development/SchoolC/algorithm/hw1/build/Debug/outDebug"
+      "cwd": "/Users/davidchen/development/SchoolC/algorithm/hw2",
+      "program": "/Users/davidchen/development/SchoolC/algorithm/hw2/build/Debug/outDebug"
     }
   ]
 }
