@@ -9,51 +9,36 @@
 
 using namespace std;
 
-map<pair<int,int>,double> distances;
-
-void recordDistances(map<int,pair<int,int>> &location){
+void recordDistances(map<int,pair<int,int>> &location,double** distanceBetween){
     for(auto loc1 = location.begin();loc1!=location.end();loc1++){
         for(auto loc2 = location.begin();loc2!=location.end();loc2++){
             if(loc1->first==loc2->first) continue;
             int dx = loc1->second.first-loc2->second.first;
             int dy = loc1->second.second-loc2->second.second;
-            distances[{loc1->first,loc2->first}] = sqrt(dx*dx+dy*dy);
+            distanceBetween[loc1->first][loc2->first] = sqrt(dx*dx+dy*dy);
         }
     }
 }
 
-void perm(vector<int>& reserve, vector<int>& remain, vector<int>& best, double& bestDistance, double currentDistance){
-    // if(currentDistance>bestDistance) return;
-    if(remain.size()==0){
-        double finalDistance = currentDistance+distances[{reserve.back(),reserve[0]}];
-        if(finalDistance<bestDistance){
-            best = reserve;
-            bestDistance = finalDistance;
-            // cout << "New best: ";
-            // for (size_t i = 0; i < best.size(); i++) {
-            //     cout << best[i] << " ";
-            // }
-            // cout << endl << "New best distance: " << bestDistance << endl;
-        }
-        return;
+double calculateDistance(vector<int>& locationID,double** distanceBetween){
+    double distance = distanceBetween[locationID[0]][locationID.back()];
+    for(size_t i=0;i<locationID.size()-1;i++){
+        distance+=distanceBetween[locationID[i]][locationID[i+1]];
     }
-    for(size_t i=0;i<remain.size();i++){
-        reserve.push_back(remain[i]);
-        int temp=remain[i];
-        double edgeLength = (reserve.size()>=2)?distances[{reserve[reserve.size()-2], temp}]:0;
-        // double edgeLength = distances[{reserve[reserve.size()-2], temp}];
-        swap(remain.back(),remain[i]);
-        remain.pop_back();
-        perm(reserve,remain,best,bestDistance,currentDistance+edgeLength);
-        remain.push_back(temp);
-        swap(remain[i],remain.back());
-        reserve.pop_back();
+    return distance;
+}
+
+void perm(vector<int>& locationID, vector<int>& best, double& bestDistance, double** distanceBetween){
+    while(next_permutation(locationID.begin(),locationID.end())){
+        double distance = calculateDistance(locationID,distanceBetween);
+        if(distance<bestDistance){
+            bestDistance = distance;
+            best = locationID;
+        }
     }
 }
 
 int main(int argc,char* argv[]){
-
-    distances.clear();
     
     if(argc==1){
         cout<<"No file in arguement"<<endl;
@@ -71,15 +56,18 @@ int main(int argc,char* argv[]){
         ifstream inFile(inFileName);
 
         map<int,pair<int,int>> location;
-        vector<int> reserve;
+        map<int,string> locationIDString;
         vector<int> locationID;
-
+        
         if (inFile.is_open()){
-            int ID;
+            string ID;
             pair<int,int> coordinate;
+            int intID = 0;
             while(inFile >> ID >>coordinate.first>>coordinate.second){
-                location[ID] = coordinate;
-                locationID.push_back(ID);
+                location[intID] = coordinate;
+                locationID.push_back(intID);
+                locationIDString[intID] = ID;
+                intID++;
             }
             inFile.close();
         }
@@ -88,20 +76,20 @@ int main(int argc,char* argv[]){
             continue;
         }
 
-        recordDistances(location);
-        vector<int> best = locationID;
-        double bestDistance = 0;
-        for(size_t i=0;i<best.size();i++){
-            int destination = ((i==best.size()-1))?best[0]:best[i+1];
-            bestDistance+=distances[{best[i],destination}];
+        double** distanceBetween = new double*[locationID.size()];
+        for(int i=0;i<locationID.size();i++){
+            distanceBetween[i] = new double[locationID.size()];
         }
 
-        // reserve.push_back(locationID[0]);
-        // locationID.erase(locationID.begin());
+        recordDistances(location,distanceBetween);
+        vector<int> best = locationID;
+        double bestDistance = calculateDistance(best,distanceBetween);
 
-        perm(reserve,locationID,best,bestDistance,0);
+        perm(locationID,best,bestDistance,distanceBetween);
+        vector<string> bestString;
         for(size_t i=0;i<best.size();i++){
-            cout<<best[i]<<" ";
+            bestString.push_back(locationIDString[best[i]]);
+            cout<<bestString[i]<<" ";
         }
         cout<<endl<<bestDistance<<endl;
 
@@ -117,7 +105,7 @@ int main(int argc,char* argv[]){
         if(outFile.is_open()){
             outFile<<"distance: "<<bestDistance<<endl;
             for(size_t i=0;i<best.size();i++){
-                outFile<<best[i]<<endl;
+                outFile<<bestString[i]<<endl;
             }
         }
 
