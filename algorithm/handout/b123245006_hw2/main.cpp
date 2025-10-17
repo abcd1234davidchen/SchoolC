@@ -47,23 +47,38 @@ double greedy(vector<int>& solution,vector<int>& locationID,map<int,pair<int,int
 
 int main(int argc,char* argv[]){
     
+    int fileAmount = 0;
+    vector<string> fileNames;
+
     //Determine if no/one/multiple file
     if(argc==1){
-        cout<<"No file in arguement"<<endl;
-        return 1;
+        cout<<"No file in arguement. Please input file names:"<<endl;
+        string fileString;
+        getline(cin,fileString);
+        istringstream iss(fileString);
+        string singleFileName;
+        while(iss>>singleFileName){
+            fileNames.push_back(singleFileName);
+            fileAmount++;
+        }
     }
     else if(argc==2){
         cout<<"1 File"<<endl;
+        fileAmount = 1;
     }
     else{
         cout<<argc-1<<"File"<<endl;
+        fileAmount = argc-1;
+        for(int i=1;i<argc;i++){
+            fileNames.push_back(argv[i]);
+        }
     }
-    
+
     //For each file
-    for(int f=1;f<argc;f++){
+    for(int f=0;f<fileAmount;f++){
 
         //Take in file
-        string inFileName = argv[f];
+        string inFileName = fileNames[f];
         ifstream inFile(inFileName);
 
         //Give each location a new ID to :
@@ -131,7 +146,7 @@ int main(int argc,char* argv[]){
         if(argc==2) outFileName = "ans.txt";
         else{
             ostringstream oss;
-            oss<<"ans_dt"<<setw(2)<<setfill('0')<<f<<".txt";
+            oss<<"ans_dt"<<setw(2)<<setfill('0')<<(f+1)<<".txt";
             outFileName = oss.str();
         }
         ofstream outFile(outFileName);
@@ -158,7 +173,7 @@ int main(int argc,char* argv[]){
         if(argc==2) drawFileName = "fig.png";
         else{
             ostringstream oss;
-            oss<<"fig_dt"<<setw(2)<<setfill('0')<<f<<".png";
+            oss<<"fig_dt"<<setw(2)<<setfill('0')<<(f+1)<<".png";
             drawFileName = oss.str();
         }
 
