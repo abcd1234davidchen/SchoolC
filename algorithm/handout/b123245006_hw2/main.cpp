@@ -8,6 +8,7 @@
 #include <sstream>
 #include <algorithm>
 #include <cstdlib>
+#include <cfloat>
 
 using namespace std;
 
@@ -91,21 +92,36 @@ int main(int argc,char* argv[]){
         }
 
         //Set a start for solution
-        vector<int> solution;
-        solution.push_back(locationID[0]);
-        locationID.erase(locationID.begin());
-        //Get the distance and greedy solution
-        double solutionDistance = greedy(solution,locationID,location);
-        //Add the last point to form circle
-        solutionDistance+=calculateDistances(solution[0],solution.back(),location);
+        
+        vector<int> bestSolution = locationID;
+        double bestSolutionDistance = DBL_MAX;
+
+        for(size_t rot = 0; rot<locationID.size();rot++){
+            vector<int> solution;
+            vector<int> duplicateLocationID = locationID;
+            
+            //Set new number to be the head by swap to end and pop to head
+            swap(duplicateLocationID[rot],duplicateLocationID[duplicateLocationID.size()-1]);
+            solution.push_back(duplicateLocationID.back());
+            duplicateLocationID.pop_back();
+            //Get the distance and greedy solution
+            double solutionDistance = greedy(solution,duplicateLocationID,location);
+            //Add the last point to form circle
+            solutionDistance+=calculateDistances(solution[0],solution.back(),location);
+
+            if (solutionDistance<bestSolutionDistance){
+                bestSolutionDistance = solutionDistance;
+                bestSolution = solution;
+            }
+        }
 
         //Revert solution loop back to string ID
         vector<string> solutionString;
-        for(size_t i=0;i<solution.size();i++){
-            solutionString.push_back(locationIDString[solution[i]]);
+        for(size_t i=0;i<bestSolution.size();i++){
+            solutionString.push_back(locationIDString[bestSolution[i]]);
             cout<<solutionString[i]<<" ";
         }
-        cout<<endl<<solutionDistance<<endl;
+        cout<<endl<<bestSolutionDistance<<endl;
 
         //Set output file name
         //if multiple file -> ans_dt(x).txt
@@ -120,8 +136,8 @@ int main(int argc,char* argv[]){
         }
         ofstream outFile(outFileName);
         if(outFile.is_open()){
-            outFile<<"distance: "<<solutionDistance<<endl;
-            for(size_t i=0;i<solution.size();i++){
+            outFile<<"distance: "<<bestSolutionDistance<<endl;
+            for(size_t i=0;i<bestSolution.size();i++){
                 outFile<<solutionString[i]<<endl;
             }
         }
