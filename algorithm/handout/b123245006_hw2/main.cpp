@@ -62,8 +62,9 @@ int main(int argc,char* argv[]){
             fileAmount++;
         }
     }
-    else if(argc==2){
+    else if(fileAmount==1){
         cout<<"1 File"<<endl;
+        fileNames.push_back(argv[1]);
         fileAmount = 1;
     }
     else{
@@ -143,7 +144,7 @@ int main(int argc,char* argv[]){
         //else -> ans.txt
         //and write as format
         string outFileName = "";
-        if(argc==2) outFileName = "ans.txt";
+        if(fileAmount==1) outFileName = "ans.txt";
         else{
             ostringstream oss;
             oss<<"ans_dt"<<setw(2)<<setfill('0')<<(f+1)<<".txt";
@@ -170,7 +171,7 @@ int main(int argc,char* argv[]){
 
         //Set output figure name depend on file amount
         string drawFileName = "";
-        if(argc==2) drawFileName = "fig.png";
+        if(fileAmount==1) drawFileName = "fig.png";
         else{
             ostringstream oss;
             oss<<"fig_dt"<<setw(2)<<setfill('0')<<(f+1)<<".png";
