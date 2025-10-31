@@ -62,13 +62,13 @@ int main(int argc,char* argv[]){
             fileAmount++;
         }
     }
-    else if(fileAmount==1){
+    else if(argc==2){
         cout<<"1 File"<<endl;
         fileNames.push_back(argv[1]);
         fileAmount = 1;
     }
     else{
-        cout<<argc-1<<"File"<<endl;
+        cout<<argc-1<<" Files"<<endl;
         fileAmount = argc-1;
         for(int i=1;i<argc;i++){
             fileNames.push_back(argv[i]);
