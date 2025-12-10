@@ -1,51 +1,102 @@
-import pandas as pd
-import matplotlib.pyplot as plt
 import sys
-import os
+import math
+from pathlib import Path
 
-# check if arguements are correct
-if len(sys.argv)!=4:
-    print("Invalid arguements")
+import imageio.v2 as imageio
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib.backends.backend_agg import FigureCanvasAgg
 
-# points file/order file/output figure
-pointFileName = sys.argv[1]
-orderFileName = sys.argv[2]
-plotFileName = sys.argv[3]
 
-# check if point file and order exist
-if not os.path.isfile(pointFileName):
-    print(f"File not found: {pointFileName}")
-    sys.exit(1)
-if not os.path.isfile(orderFileName):
-    print(f"File not found: {orderFileName}")
-    sys.exit(1)
+def read_frames(txt_path: Path):
+    lines = [ln.strip() for ln in txt_path.read_text().splitlines() if ln.strip()]
+    if not lines:
+        raise ValueError("Input file is empty")
 
-# read point file and put into pandas
-df = pd.read_csv(pointFileName, sep=r'\s+', header=None, dtype={0: str})
-df.columns = ['ID','x','y']
-df = df.set_index('ID')
+    # 靜態點（保持不動）
+    static_vals = list(map(float, lines[0].split()))
+    if len(static_vals) % 2 != 0:
+        raise ValueError("Static points line must contain even number of values")
+    static_xy = list(zip(static_vals[0::2], static_vals[1::2]))
 
-# reorder by order file
-f = open(orderFileName,'r')
-lines = f.readlines()
-f.close()
-# keep IDs as strings (skip the header line like "distance: ...")
-lines = [x.strip() for x in lines[1:] if x.strip()]
-df = df.loc[lines]
+    # 動畫幀
+    frames = []
+    for li, line in enumerate(lines[1:], start=2):
+        vals = list(map(float, line.split()))
+        if len(vals) % 2 != 0:
+            raise ValueError(f"Line {li} has odd number of values")
+        xy = list(zip(vals[0::2], vals[1::2]))
+        frames.append(xy)
 
-# Disassemble x and y line and append head to form circle
-x = list(df['x'])
-y = list(df['y'])
-x.append(x[0])
-y.append(y[0])
+    if not frames:
+        raise ValueError("No animation frames found")
+    return static_xy, frames
 
-fig = plt.figure(figsize=(6, 6)) 
-ax = plt.subplot(1,1,1)
-ax.plot(x,y)
-axis_max = max(max(x), max(y),max(y)+min(y),max(x)+min(x))
-axis_min = min(min(x), min(y),0)
-ax.set_ylim(axis_min, axis_max)
-ax.set_xlim(axis_min, axis_max)
-ax.set_aspect('equal', adjustable='box')
 
-plt.savefig(plotFileName,bbox_inches='tight')
+def render_gif(static_xy, frames, out_path: Path, fps=15):
+    # 計算範圍
+    xs_all = [x for x, y in static_xy]
+    ys_all = [y for x, y in static_xy]
+    for fr in frames:
+        xs_all.extend(x for x, y in fr)
+        ys_all.extend(y for x, y in fr)
+    x_min, x_max = min(xs_all), max(xs_all)
+    y_min, y_max = min(ys_all), max(ys_all)
+    pad = 0.05 * max(x_max - x_min, y_max - y_min, 1.0)
+    x_min -= pad; x_max += pad
+    y_min -= pad; y_max += pad
+
+    fig, ax = plt.subplots(figsize=(6, 6), dpi=80)
+    ax.set_xlim(x_min, x_max)
+    ax.set_ylim(y_min, y_max)
+    ax.set_aspect("equal", adjustable="box")
+    ax.scatter([p[0] for p in static_xy], [p[1] for p in static_xy],
+               c="red", s=20, zorder=3, label="static")
+    line, = ax.plot([], [], "b-", lw=1.0, alpha=0.7)
+    pts,  = ax.plot([], [], "bo", ms=3, alpha=0.7)
+    ax.legend(loc="upper right")
+
+    canvas = FigureCanvasAgg(fig)
+    images = []
+
+    # 迭代幀，並在最後補第一幀做無縫 loop
+    for fr in frames + [frames[0]]:
+        xs = [p[0] for p in fr] + [fr[0][0]]
+        ys = [p[1] for p in fr] + [fr[0][1]]
+        line.set_data(xs, ys)
+        pts.set_data(xs, ys)
+        
+        canvas.draw()
+        renderer = canvas.get_renderer()
+        raw_data = renderer.tostring_argb()
+        w, h = canvas.get_width_height()
+        # ARGB -> RGB
+        img = np.frombuffer(raw_data, dtype=np.uint8).reshape(h, w, 4)
+        img = img[:, :, 1:]  # 取 RGB，丟掉 A channel
+        images.append(img)
+
+    imageio.mimsave(out_path, images, duration=1 / fps, loop=0)
+    plt.close(fig)
+
+
+def np_from_figure(canvas):
+    # 轉為 (H, W, 3) uint8
+    import numpy as np
+    buf = canvas.buffer_rgba()
+    w, h = canvas.get_width_height()
+    arr = np.frombuffer(buf, dtype=np.uint8).reshape((h, w, 4))
+    return arr[:, :, :3]
+
+
+def main():
+    if len(sys.argv) != 3:
+        sys.exit(1)
+    txt_path = Path(sys.argv[1])
+    out_path = Path(sys.argv[2])
+    static_xy, frames = read_frames(txt_path)
+    render_gif(static_xy, frames, out_path)
+
+if __name__ == "__main__":
+    main()
