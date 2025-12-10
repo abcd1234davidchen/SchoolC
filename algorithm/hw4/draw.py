@@ -30,7 +30,7 @@ f = open(orderFileName,'r')
 lines = f.readlines()
 f.close()
 # keep IDs as strings (skip the header line like "distance: ...")
-lines = [x.strip() for x in lines[1:] if x.strip()]
+lines = [x.strip() for x in lines[2:] if x.strip()]
 df = df.loc[lines]
 
 # Disassemble x and y line and append head to form circle
