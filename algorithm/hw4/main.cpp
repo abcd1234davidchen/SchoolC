@@ -49,31 +49,38 @@ double calculateDistance(vector<int>& locationID,double** distanceBetween){
 }
 
 static double twoOptImprove(vector<int>& tour, double** distanceBetween){
-    int n = tour.size();
-    if (n < 2) return 0.0;
+    int n=tour.size();
+    if (n<2) return 0.0;
+    // Set improved flag
     bool improved = true;
     while(improved){
         improved = false;
-        for (int i = 0; i < n - 2; i++) {
-            for (int k = i + 2; k < n; k++) {
-                if (k == n - 1 && i == 0) continue; 
+        // set i for first edge, k for second edge
+        for (int i=0;i<n-2;i++) {
+            for (int k=i+2;k<n;k++) {
+                // Avoid meaningless swap
+                if (k==n-1 && i==0) continue; 
 
+                // A to B and C to D are the current edges
                 int A = tour[i];
-                int B = tour[(i + 1) % n];
+                int B = tour[(i+1)%n];
                 int C = tour[k];
-                int D = tour[(k + 1) % n];
+                int D = tour[(k+1)%n];
 
-                double currentDist = distanceBetween[A][B] + distanceBetween[C][D];
-                double newDist = distanceBetween[A][C] + distanceBetween[B][D];
-
+                // Calculate the cost difference if we swap edges
+                double currentDist = distanceBetween[A][B]+distanceBetween[C][D];
+                double newDist = distanceBetween[A][C]+distanceBetween[B][D];
+                
+                // If the swap improves the tour, perform the 2-opt swap
                 if (newDist < currentDist) {
-                    reverse(tour.begin() + i + 1, tour.begin() + k + 1);
+                    reverse(tour.begin()+i+1, tour.begin()+k+1);
                     improved = true;
                 }
             }
         }
     }
-    return calculateDistance(tour, distanceBetween);
+    // return new distance
+    return calculateDistance(tour,distanceBetween);
 }
 
 // each run of ACO
@@ -100,6 +107,7 @@ void ACO(vector<int>& locationID, vector<int>& solution, double& solutionDistanc
         vector<double> allLengths;
         // each ant constructs a tour
         for(int ant=0;ant<ants;ant++){
+            // If max evaluations reached, break
             if (eval>=max_evaluations) break;
             vector<int> tour;
             vector<bool> visited(n, false);
@@ -109,7 +117,7 @@ void ACO(vector<int>& locationID, vector<int>& solution, double& solutionDistanc
             tour.push_back(current);
             visited[current] = true;
 
-            // Construct the tour
+            // Construct the tour with the rest of the cities
             for(int step=0;step<n-1;step++){
                 double prob=0.0;
                 vector<double> probabilities(n, 0.0);
@@ -117,18 +125,22 @@ void ACO(vector<int>& locationID, vector<int>& solution, double& solutionDistanc
 
                 // Calculate probabilities for each unvisited city
                 for(int next=0;next<n;next++){
+                    // For every unvisited city
                     if(!visited[next]){
+                        // Calculate pheromone and heuristic information
                         double tau = pow(pheromone[current][next], alpha);
                         double eta = pow(1.0/distanceBetween[current][next], beta);
+                        // Add to probability and candidate list
                         probabilities[next] = tau * eta;
                         prob += probabilities[next];
                         candidates.push_back(next);
                     }
                 }
 
-                // Roulette wheel selection
+                // Pick a random value between 0 and prob
                 double random = ((double) rand() / RAND_MAX) * prob;
-                int selected = -1;
+                // Go through candidates and select based on probability
+                int selected = candidates.back();
                 for(int c : candidates){
                     random -= probabilities[c];
                     if(random <= 0.0){
@@ -136,11 +148,7 @@ void ACO(vector<int>& locationID, vector<int>& solution, double& solutionDistanc
                         break;
                     }
                 }
-
-                if (selected == -1) {
-                    selected = candidates.back();
-                }
-
+                // Change current position
                 visited[selected] = true;
                 tour.push_back(selected);
                 current = selected;
@@ -158,12 +166,14 @@ void ACO(vector<int>& locationID, vector<int>& solution, double& solutionDistanc
             }
         }
         if (eval>=max_evaluations) break;
-        // Update pheromones
+        
+        // Pheromone evaporation
         for(int i=0;i<n;i++){
             for(int j=0;j<n;j++){
                 pheromone[i][j] *= (1.0 - rho);
             }
         }
+        // Pheromone deposit
         for(size_t k=0;k<allTours.size();k++){
             double contribution = Q / allLengths[k];
             for(int step=0;step<n;step++){

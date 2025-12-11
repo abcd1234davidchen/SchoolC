@@ -36,13 +36,21 @@ double calculateDistance(vector<int>& locationID,double** distanceBetween){
 }
 
 double solveDynamicProgramming(int n, int pos, int heading, double** dpTable, double** distanceBetween, int** nextTable){
+    // Base case: all nodes visited, return distance to starting node
     if(heading==0) return distanceBetween[pos][0];
+    // Return already computed result
     if(dpTable[pos][heading] != -1) return dpTable[pos][heading];
+
     double minDistance = DBL_MAX;
     int bestNext = -1;
-    for(int i=0;i<n;i++){
-        if((heading & (1 << i))){
-            int newHeading = heading ^ (1 << i);
+    // Iterate possible next nodes 1..n-1. bit k (0-based) corresponds to node k+1.
+    for(int i=1;i<n;i++){
+        int bit = 1 << (i-1);
+        // If node i is unvisited
+        if((heading & bit)){
+            // Calculate distance if going to node i next
+            int newHeading = heading ^ bit;
+            // The distance is distance to node i plus the optimal distance from node i with updated heading
             double currentDistance = distanceBetween[pos][i];
             currentDistance += solveDynamicProgramming(n, i, newHeading, dpTable, distanceBetween, nextTable);
             if(currentDistance < minDistance){
@@ -51,34 +59,44 @@ double solveDynamicProgramming(int n, int pos, int heading, double** dpTable, do
             }
         }
     }
+    // Store best next position for reconstruction
     nextTable[pos][heading] = bestNext;
+    // Store and return minimum distance found
     return dpTable[pos][heading] = minDistance;
 }
 
 void dynamicProgramming(vector<int>& locationID, vector<int>& solution, double& solutionDistance, double** distanceBetween){
     int n = locationID.size();
+    // create table to store intermediate results
     double** dpTable = new double*[n];
     for(size_t i=0;i<locationID.size();i++){
-        dpTable[i] = new double[1 << n];
+        dpTable[i] = new double[1 << (n-1)];
     }
+    // create table to store next position
     int** nextTable = new int*[n];
     for(size_t i=0;i<locationID.size();i++){
-        nextTable[i] = new int[1 << n];
+        nextTable[i] = new int[1 << (n-1)];
     }
+    // initialize tables
     for(int i=0;i<n;i++){
-        for(int j=0;j<(1<<n);j++){
+        for(int j=0;j<(1<<(n-1));j++){
             dpTable[i][j] = -1;
             nextTable[i][j] = -1;
         }
     }
-    int heading = (1 << n) - 2;
+    // The goal is to find the minimum distance starting from position 0 with all other positions unvisited
+    // Use n-1 bits to represent nodes 1..n-1 (bit k -> node k+1)
+    int heading = (1 << (n-1)) - 1;
     solutionDistance = solveDynamicProgramming(n, 0, heading, dpTable, distanceBetween, nextTable);
+    // Reconstruct solution path, starting from position 0 with all other positions unvisited
     int pos = 0;
     solution.push_back(locationID[pos]);
     while(heading){
+        // get next position from nextTable
         int nextPos = nextTable[pos][heading];
         solution.push_back(locationID[nextPos]);
-        heading = heading ^ (1 << nextPos);
+        // flip bit for node nextPos: bit index is nextPos-1
+        heading = heading ^ (1 << (nextPos-1));
         pos = nextPos;
     }
 }

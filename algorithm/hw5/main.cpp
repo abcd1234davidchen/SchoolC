@@ -50,10 +50,10 @@ double calculateDistance(vector<int>& locationID,double** distanceBetween){
     return distance;
 }
 
-void elasticNet(vector<point>& originLocation,vector<int>& solution,
-        double& solutionDistance, double** distanceBetween,
-        const Params& paramsIn, vector<vector<point>>& GIFData){
-    vector<point> location = originLocation;
+void elasticNet(vector<point>& originLocation,vector<int>& solution,double& solutionDistance,
+    double** distanceBetween,const Params& paramsIn, vector<vector<point>>& GIFData){
+    
+    //Initialize parameters
     int n = originLocation.size();
     int m = static_cast<int>(n * paramsIn.dotFactor);
     int max_evaluation = paramsIn.max_evaluation==-1 ? n * 10000 : paramsIn.max_evaluation;
@@ -63,6 +63,7 @@ void elasticNet(vector<point>& originLocation,vector<int>& solution,
     double K = paramsIn.temperature;
     
     // Normalize locations to [0,1] range
+    vector<point> location = originLocation;
     double minX = DBL_MAX, maxX = -DBL_MAX;
     double minY = DBL_MAX, maxY = -DBL_MAX;
     for(const auto& loc : originLocation){
@@ -92,10 +93,13 @@ void elasticNet(vector<point>& originLocation,vector<int>& solution,
         net[i].y = centroid.y + radius * sin(angle);
     }
     vector<double> weights(n * m);
+
     // each iteration
     for(int iter=0;iter<max_evaluation;iter++){
+        // Break if K is too small
         if(K<0.001) break;
 
+        // Calculate weights for each location-node pair
         for(int i=0;i<n;i++){
             double weight_sum = 0.0;
             for(int j=0;j<m;j++){
@@ -132,6 +136,7 @@ void elasticNet(vector<point>& originLocation,vector<int>& solution,
             new_net[j].x += change_x;
             new_net[j].y += change_y;
         }
+        // set new net as current net and cool down
         swap(net, new_net);
         K *= paramsIn.cooling_rate;
         
@@ -140,8 +145,6 @@ void elasticNet(vector<point>& originLocation,vector<int>& solution,
             vector<point> unnormalized_net = net;
             double rangeX = maxX - minX;
             double rangeY = maxY - minY;
-            if (rangeX == 0.0) rangeX = 1.0; // avoid divide-by-zero / degenerate case
-            if (rangeY == 0.0) rangeY = 1.0;
             for (auto &p : unnormalized_net) {
                 p.x = p.x * rangeX + minX;
                 p.y = p.y * rangeY + minY;

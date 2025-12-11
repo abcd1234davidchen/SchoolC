@@ -37,7 +37,8 @@ def render_gif(static_xy, frames, out_path: Path, fps=15, pause_seconds=2.0):
         xs_all.extend(x for x, y in fr)
         ys_all.extend(y for x, y in fr)
         
-    if not xs_all: return
+    if not xs_all:
+        return
 
     x_min, x_max = min(xs_all), max(xs_all)
     y_min, y_max = min(ys_all), max(ys_all)
@@ -46,54 +47,64 @@ def render_gif(static_xy, frames, out_path: Path, fps=15, pause_seconds=2.0):
     y_min -= pad; y_max += pad
 
     fig, ax = plt.subplots(figsize=(6, 6), dpi=80)
-    
-    # Pre-configure plot settings
     canvas = FigureCanvasAgg(fig)
-    
-    images = []
 
-    for i, fr in enumerate(frames):
-        ax.clear()
-        ax.set_xlim(x_min, x_max)
-        ax.set_ylim(y_min, y_max)
-        ax.set_aspect("equal", adjustable="box")
-        
-        # 1. Draw Static Cities (Red)
-        ax.scatter([p[0] for p in static_xy], [p[1] for p in static_xy],
-                   c="red", s=20, zorder=3, label="static")
-        
-        # 2. Draw Dynamic Path (Blue)
-        # Close loop visually by appending start point to end
-        xs = [p[0] for p in fr] + [fr[0][0]]
-        ys = [p[1] for p in fr] + [fr[0][1]]
-        
-        ax.plot(xs, ys, "b-", lw=1.0, alpha=0.7)
-        ax.plot(xs, ys, "bo", ms=3, alpha=0.7)
-        
-        # Remove legend to save space/clutter if desired, or keep it
-        # ax.legend(loc="upper right")
-        
-        canvas.draw()
-        renderer = canvas.get_renderer()
-        raw_data = renderer.tostring_argb()
-        w, h = canvas.get_width_height()
-        img = np.frombuffer(raw_data, dtype=np.uint8).reshape(h, w, 4)
-        images.append(img[:, :, 1:]) # RGB
+    # Configure static plot once
+    ax.set_xlim(x_min, x_max)
+    ax.set_ylim(y_min, y_max)
+    ax.set_aspect("equal", adjustable="box")
+    static_x = [p[0] for p in static_xy]
+    static_y = [p[1] for p in static_xy]
+    ax.scatter(static_x, static_y, c="red", s=20, zorder=3, label="static")
 
-    # --- FORCE PAUSE BY DUPLICATION ---
-    # Instead of setting duration, we copy the last frame N times
-    # 2.0 seconds * 15 fps = 30 copies
+    # Pre-create dynamic artists and avoid clearing axes each frame
+    line, = ax.plot([], [], "b-", lw=1.0, alpha=0.7)
+    pts, = ax.plot([], [], "bo", ms=3, alpha=0.7, linestyle="None")
+
+    # Prepare writer to stream frames to disk (reduces memory)
     copies = int(pause_seconds * fps)
-    last_img = images[-1]
-    for _ in range(copies):
-        images.append(last_img)
+    canvas.draw()
+    w, h = canvas.get_width_height()
 
-    # --- LOOP BACK ---
-    # Add the first frame at the very end to smooth the loop
-    images.append(images[0])
+    import imageio
+    with imageio.get_writer(out_path, mode='I', fps=fps, loop=0) as writer:
+        first_frame_rgb = None
+        last_frame_rgb = None
 
-    # Use standard duration for all frames
-    imageio.mimsave(out_path, images, fps=fps, loop=0)
+        for i, fr in enumerate(frames):
+            arr = np.asarray(fr)
+            if arr.size == 0:
+                xs_closed = np.array([])
+                ys_closed = np.array([])
+                xs_pts = ys_pts = np.array([])
+            else:
+                xs_pts = arr[:, 0]
+                ys_pts = arr[:, 1]
+                # close loop visually
+                xs_closed = np.concatenate([xs_pts, xs_pts[:1]])
+                ys_closed = np.concatenate([ys_pts, ys_pts[:1]])
+
+            line.set_data(xs_closed, ys_closed)
+            pts.set_data(xs_pts, ys_pts)
+
+            canvas.draw()
+            raw = canvas.tostring_argb()
+            img = np.frombuffer(raw, dtype=np.uint8).reshape(h, w, 4)
+            rgb = img[:, :, 1:]  # RGB
+
+            if i == 0:
+                first_frame_rgb = rgb
+            last_frame_rgb = rgb
+            writer.append_data(rgb)
+
+        # Pause by duplicating last frame
+        if last_frame_rgb is not None:
+            for _ in range(copies):
+                writer.append_data(last_frame_rgb)
+        # Loop back smoothly by appending first frame
+        if first_frame_rgb is not None:
+            writer.append_data(first_frame_rgb)
+
     plt.close(fig)
 
 def main():
