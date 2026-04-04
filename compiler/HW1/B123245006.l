@@ -88,7 +88,7 @@ symbol [,:;\(\)\{\}\[\]]
 operator (\+|\+\+|\-|\-\-|\*|\/|%|=|==|!=|>|<|>=|<=|&&|\|\||!)
 reserved_word (abstract|assert|boolean|break|byte|case|catch|char|class|const|continue|default|do|double|else|enum|extends|false|final|finally|float|for|goto|if|implements|import|instanceof|int|interface|long|main|native|new|null|package|print|private|protected|public|return|short|static|string|strictfp|super|switch|synchronized|this|throw|throws|transient|true|try|void|volatile|while)
 
-id [a-zA-Z_][a-zA-Z0-9_]*
+id [a-zA-Z_$][a-zA-Z0-9_$]*
 int_constant [+-]?[0-9]+
 float_constant [+-]?([0-9]*\.[0-9]+|[0-9]+\.[0-9]*)([eE][+-]?[0-9]+)?
 string_constant \"([^\\\"]|\\.)*\"
@@ -98,7 +98,7 @@ eol \n
 
 %%
 
-"//"[^\n]* {
+"//"[^\n\r]* {
 	printf("Line: %d, 1st char: %d, \"%s\" is a \"comment\".\n", lineCount, charCount, yytext);
 	charCount += yyleng;
 }
@@ -141,11 +141,6 @@ eol \n
 	fprintf(stderr, "Unterminated comment at line %d.\n", lineCount);
 	return 0;
 }
-
-{operator} {
-	printf("Line: %d, 1st char: %d, \"%s\" is an \"operator\".\n", lineCount, charCount, yytext);
-	charCount += yyleng;
-}
 {space} {
 	charCount++;
 }
@@ -157,6 +152,10 @@ eol \n
 	printf("Line: %d, 1st char: %d, \"%s\" is a \"reserved word\".\n", lineCount, charCount, yytext);
 	charCount += yyleng;
 }
+{operator} {
+	printf("Line: %d, 1st char: %d, \"%s\" is an \"operator\".\n", lineCount, charCount, yytext);
+	charCount += yyleng;
+}
 {symbol} {
 	printf("Line: %d, 1st char: %d, \"%s\" is a \"symbol\".\n", lineCount, charCount, yytext);
 	charCount += yyleng;
@@ -166,12 +165,12 @@ eol \n
 	insert(map, yytext);
 	charCount += yyleng;
 }
-{int_constant} {
-	printf("Line: %d, 1st char: %d, \"%s\" is an \"integer\".\n", lineCount, charCount, yytext);
-	charCount += yyleng;
-}
 {float_constant} {
 	printf("Line: %d, 1st char: %d, \"%s\" is a \"float\".\n", lineCount, charCount, yytext);
+	charCount += yyleng;
+}
+{int_constant} {
+	printf("Line: %d, 1st char: %d, \"%s\" is an \"integer\".\n", lineCount, charCount, yytext);
 	charCount += yyleng;
 }
 {string_constant} {

@@ -4,7 +4,7 @@ all:	$(PROG_lex)
 	gcc $(PROG_lex) -o scanner -lfl
 mac:
 	flex $(FILE_lex)
-	gcc $(PROG_lex) -o scanner -L/opt/homebrew/opt/flex/lib -lfl
+	gcc $(PROG_lex) -o scanner -L/opt/homebrew/opt/flex/lib -lfl || gcc $(PROG_lex) -o scanner -ll
 $(PROG_lex):	$(FILE_lex)
 	flex $(FILE_lex)
 
