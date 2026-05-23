@@ -46,54 +46,6 @@ The following syntactic definitions are just snippets. You must come up with you
 
 The basic data types are `boolean`, `char`, `int`, `float`, and `String`. A variable is declared in the following format:
 
-# CompilerLab - Simple Java Parser
-
-**NSYSU CSE**
-
-This assignment is to write a Simple Java Parser. You must write the grammar that conforms to the syntactic definitions in the following sections. Once you have defined these grammars, you can substitute them into Yacc to generate a C file named `y.tab.c` (this C file contains `yyparse()`).
-
-`yyparse()` will call `yylex()` to obtain a token, so you need to modify your first assignment - Scanner - to allow `yyparse()` to obtain the token.
-
-**Full Java grammar structure:**
-http://db.cse.nsysu.edu.tw/~changyi/slides/compiler/lab/Java.doc
-
-You must consider the following issues:
-(a) Your parser must be able to generate error messages when it encounters an error. Those error messages include the following cases:
-1. The line number where the error occurred.
-2. The position of the character. Moreover, an explanation of the cause of the error.
-
-(b) When the parser encounters an error, it should process the input as completely as possible. That is, the parser should perform recovery when it encounters an error.
-
----
-
-## 1. What to Submit
-
-You must submit the following files:
-* [ ] The revised Scanner should be named - `your student ID.l`
-* [ ] Your Parser should be named - `your student ID.y` (It should include comments to explain how to process statements.)
-* [ ] Your test files
-* [ ] All `.c` and `.h` files
-* [ ] Makefile
-* [ ] A `Readme.pdf` containing:
-    * [ ] Lex, Yacc version
-    * [ ] Operating platform
-    * [ ] Execution method
-    * [ ] How you handle the issues in this specification
-    * [ ] Problems you encountered while writing this assignment
-    * [ ] The results of executing all test files, saved as an image.
-
-Please compress all the above files into one file, named - `your student ID_hw2`
-
----
-
-## 2. Syntactic Definitions
-
-The following syntactic definitions are just snippets. You must come up with your own grammar that conforms to these syntactic definitions to complete your assignment.
-
-### 2.1 Data Types and Declarations
-
-The basic data types are `boolean`, `char`, `int`, `float`, and `String`. A variable is declared in the following format:
-
 
 ```text
 [static] type identifier_list;

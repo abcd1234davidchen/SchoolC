@@ -1,9 +1,9 @@
 all:	clean y.tab.c lex.yy.c
-	gcc lex.yy.c y.tab.c -ly -ll -o parser
+	gcc lex.yy.c y.tab.c -lfl -o parser
 
 mac:	clean y.tab.c lex.yy.c
 
-	gcc lex.yy.c y.tab.c -L/opt/homebrew/opt/flex/lib -ly -ll -o parser || gcc lex.yy.c y.tab.c -ly -ll -o parser
+	gcc lex.yy.c y.tab.c -L/opt/homebrew/opt/flex/lib -ll -o parser || gcc lex.yy.c y.tab.c -ll -o parser
 
 y.tab.c:
 	bison -y -d B123245006.y

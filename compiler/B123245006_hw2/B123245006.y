@@ -12,6 +12,10 @@ extern char *yytext;
 
 typedef struct Symbol {
 	char *name;
+	int used;
+	int line;
+	int ch;
+	int reportUnused;
 	struct Symbol *next;
 } Symbol;
 
@@ -24,6 +28,38 @@ static Scope *scopeStack = NULL;
 static int elseLine = 0;
 static int elseChar = 0;
 
+// Helper functions for symbol table management
+static Symbol *find_identifier(const char *name)
+{
+	Scope *scope;
+	Symbol *sym;
+
+	if (name == NULL) {
+		return NULL;
+	}
+
+	for (scope = scopeStack; scope != NULL; scope = scope->next) {
+		for (sym = scope->symbols; sym != NULL; sym = sym->next) {
+			if (strcmp(sym->name, name) == 0) {
+				return sym;
+			}
+		}
+	}
+
+	return NULL;
+}
+
+// Mark an identifier as used when it is referenced in the code
+static void mark_identifier_used(const char *name)
+{
+	Symbol *sym = find_identifier(name);
+
+	if (sym != NULL) {
+		sym->used = 1;
+	}
+}
+
+// Enter a new scope by pushing a new Scope struct onto the scope stack
 static void enter_scope(void)
 {
 	Scope *scope = (Scope *)malloc(sizeof(Scope));
@@ -36,6 +72,7 @@ static void enter_scope(void)
 	scopeStack = scope;
 }
 
+// Leave the current scope by popping the top Scope struct from the scope stack and freeing its memory
 static void leave_scope(void)
 {
 	Scope *scope = scopeStack;
@@ -49,13 +86,17 @@ static void leave_scope(void)
 	while (scope->symbols != NULL) {
 		sym = scope->symbols;
 		scope->symbols = sym->next;
+		if (sym->reportUnused && !sym->used) {
+			printf("******'%s' at line %d is never used.******\n", sym->name, sym->line);
+		}
 		free(sym->name);
 		free(sym);
 	}
 	free(scope);
 }
 
-static void declare_identifier(char *name)
+// Declare a new identifier in the current scope. If the identifier already exists in the current scope, print an error message and do not add it to the symbol table. The reportUnused parameter indicates whether to report an unused variable warning for this identifier when leaving the scope.
+static void declare_identifier(char *name, int reportUnused)
 {
 	Symbol *sym;
 
@@ -80,6 +121,10 @@ static void declare_identifier(char *name)
 		exit(1);
 	}
 	sym->name = name;
+	sym->used = 0;
+	sym->line = tokenLine;
+	sym->ch = tokenChar;
+	sym->reportUnused = reportUnused;
 	sym->next = scopeStack->symbols;
 	scopeStack->symbols = sym;
 }
@@ -137,17 +182,15 @@ class_body
 	;
 
 /* e.g. 
-	static int x; 
-	final int x=5, y=10;
+	static int x; | final int x=5, y=10;
 	(opt_method_modifier)private void foo() { ... }
-	void foo() { ... }
-	String toString() { ... }
+	void foo() { ... } | String toString() { ... } | ERROR HANDLE
 */
 class_member
-	: modifiers return_type ID { declare_identifier($3); } member_tail
-	| return_type ID { declare_identifier($2); } member_tail
+	: modifiers return_type ID { declare_identifier($3, 0); } member_tail
+	| return_type ID { declare_identifier($2, 0); } member_tail
 	| const_decl
-	| ID { declare_identifier($1); } method_tail
+	| ID { declare_identifier($1, 0); } method_tail
 	| class_decl
 	| error ';' { yyerrok; }
 	;
@@ -211,7 +254,7 @@ class_declarator_list
 	;
 
 class_declarator
-	: ID { declare_identifier($1); } initializer_opt
+	: ID { declare_identifier($1, 0); } initializer_opt
 	;
 
 const_declarator_list
@@ -220,8 +263,8 @@ const_declarator_list
 	;
 
 const_declarator
-	: ID '=' expression { declare_identifier($1); }
-	| ID { declare_identifier($1); yyerror("final declaration needs an initializer"); }
+	: ID '=' expression { declare_identifier($1, 0); }
+	| ID { declare_identifier($1, 0); yyerror("final declaration needs an initializer"); }
 	;
 
 return_type
@@ -249,11 +292,10 @@ formal_list
 	;
 
 formal_arg
-	: type ID { declare_identifier($2); }
+	: type ID { declare_identifier($2, 0); }
 	;
 
-/* Compound statements create a new scope except for method bodies, which
-   already entered the parameter/local scope before parsing declarations. */
+/* Compound statements create a new scope. */
 compound_stmt
 	: compound_scope_start block_items compound_scope_end
 	;
@@ -279,8 +321,13 @@ block_items
 	| /* empty */
 	;
 
+/* Inside compound statements or method bodies
+   e.g.
+   int foo(...){...} | final int x=5; | x=5; | if(...){...}else{...} | 
+   while(...){...}' | ERROR HANDLE
+*/
 block_item
-	: return_type ID { declare_identifier($2); } local_decl_tail
+	: return_type ID { declare_identifier($2, 1); } local_decl_tail
 	| const_decl
 	| statement
 	| class_decl
@@ -292,9 +339,11 @@ local_decl_tail
 	| initializer_opt ',' class_declarator_list ';'
 	;
 
-/* Statements are split by purpose: simple statements, control flow, return,
-   and nested compound statements.  The dangling-else precedence binds an else
-   to the nearest valid if. */
+/*
+	e.g.
+	x=5; | print(x); | read(x); | while(...){...} | if(...){...}else{...}
+	return x; | ELSE ERROR
+*/
 statement
 	: simple_stmt
 	| compound_stmt
@@ -304,6 +353,10 @@ statement
 	| ELSE { elseLine = tokenLine; elseChar = tokenChar; printf("******Else Without If at line %d, char %d******\n", elseLine, elseChar);} statement
 	;
 
+/* 
+	e.g.
+	x=5; | print(x); | read(x); | x+5; | ERROR
+*/
 simple_stmt
 	: name '=' expression ';'
 	| PRINT '(' expression ')' ';'
@@ -318,22 +371,22 @@ simple_stmt
 		{ yyerror("statement without semicolon"); yyerrok; }
 	;
 
+/* if statements */
 if_stmt
 	: IF '(' boolean_expr ')' statement %prec LOWER_THAN_ELSE
 	| IF '(' boolean_expr ')' statement ELSE statement
-	| IF '(' error ')' statement
-		{ yyerror("invalid boolean expression"); yyerrok; }
+	| IF '(' error ')' statement {yyerrok;}
 	;
 
+/* loop statements */
 loop_stmt
 	: WHILE '(' boolean_expr ')' statement
-	| WHILE '(' error ')' statement
-		{yyerrok; }
+	| WHILE '(' error ')' statement {yyerrok;}
 	| FOR '(' for_init_opt ';' boolean_expr_opt ';' for_update_opt ')' statement
-	| FOR '(' error ')' statement
-		{ yyerror("invalid for statement"); yyerrok; }
+	| FOR '(' error ')' statement {yyerrok;}
 	;
 
+/* return statements */
 return_stmt
 	: RETURN expression ';'
 	| RETURN ';'
@@ -341,6 +394,7 @@ return_stmt
 		{ yyerror("statement without semicolon"); yyerrok; }
 	;
 
+/* for initialization */
 for_init_opt
 	: for_init
 	| /* empty */
@@ -384,6 +438,10 @@ boolean_expr
 	: expression
 	;
 
+/* Expressions
+	e.g.
+	x+5 | x-5 | x==5 | x!=5 | x<5 | x>5 | x<=5 | x>=5 | x&&y | x||y
+*/
 expression
 	: term
 	| expression '+' term
@@ -398,6 +456,11 @@ expression
 	| expression OR term
 	;
 
+/*
+	e.g.
+	x | 5 | !x | +x | -x | ++x | --x | x++ | x-- | (x) | method_invocation()
+	new A() | new int[5] | x*y | x/y | x%y
+*/
 term
 	: factor
 	| term '*' factor
@@ -405,6 +468,11 @@ term
 	| term '%' factor
 	;
 
+/*
+	e.g.
+	x | 5 | !x | +x | -x | ++x | --x | x++ | x-- | (x) | method_invocation()
+	new A() | new int[5]
+*/
 factor
 	: name
 	| literal
@@ -423,6 +491,7 @@ factor
 	| NEW new_type '[' expression ']'
 	;
 
+/* Constants and boolean literals */
 literal
 	: INT_CONSTANT { free($1); }
 	| FLOAT_CONSTANT { free($1); }
@@ -433,6 +502,9 @@ literal
 	| NULLTOK
 	;
 
+/* Method invocations
+	e.g.: foo()
+*/
 method_invocation
 	: name '(' argument_opt ')'
 	;
@@ -448,8 +520,8 @@ argument_list
 	;
 
 name
-	: ID { free($1); }
-	| name '.' ID { free($3); }
+	: ID { mark_identifier_used($1); free($1); }
+	| name '.' ID { mark_identifier_used($3); free($3); }
 	| name '[' expression ']'
 	;
 
@@ -463,6 +535,7 @@ void yyerror(const char *msg)
 int main(void)
 {
 	enter_scope();
+	yyparse();
 	while (scopeStack != NULL) {
 		leave_scope();
 	}
