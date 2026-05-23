@@ -21,9 +21,8 @@ typedef struct Scope {
 } Scope;
 
 static Scope *scopeStack = NULL;
-static int syntaxErrorCount = 0;
-static int semanticErrorCount = 0;
-static int syntaxErrorReported = 0;
+static int elseLine = 0;
+static int elseChar = 0;
 
 static void enter_scope(void)
 {
@@ -70,7 +69,6 @@ static void declare_identifier(char *name)
 	for (sym = scopeStack->symbols; sym != NULL; sym = sym->next) {
 		if (strcmp(sym->name, name) == 0) {
 			printf("******'%s' in the next line is a duplicated identifier in the current scope.******\n", name);
-			semanticErrorCount++;
 			free(name);
 			return;
 		}
@@ -151,7 +149,7 @@ class_member
 	| const_decl
 	| ID { declare_identifier($1); } method_tail
 	| class_decl
-	| error ';' {yyerror("invalid class member");yyerrok;}
+	| error ';' { yyerrok; }
 	;
 
 /* e.g. (...){...} | ; | =5; | =1,y,z=2 */
@@ -286,7 +284,7 @@ block_item
 	| const_decl
 	| statement
 	| class_decl
-	| error ';' {yyerror("invalid class member");yyerrok;}
+	| error ';' { yyerrok; }
 	;
 
 local_decl_tail
@@ -303,8 +301,7 @@ statement
 	| if_stmt
 	| loop_stmt
 	| return_stmt
-	| ELSE statement
-		{ printf("******Else Without If at line %d, char %d******\n", tokenLine, tokenChar); syntaxErrorCount++; }
+	| ELSE { elseLine = tokenLine; elseChar = tokenChar; printf("******Else Without If at line %d, char %d******\n", elseLine, elseChar);} statement
 	;
 
 simple_stmt
@@ -331,7 +328,7 @@ if_stmt
 loop_stmt
 	: WHILE '(' boolean_expr ')' statement
 	| WHILE '(' error ')' statement
-		{ yyerror("invalid boolean expression"); yyerrok; }
+		{yyerrok; }
 	| FOR '(' for_init_opt ';' boolean_expr_opt ';' for_update_opt ')' statement
 	| FOR '(' error ')' statement
 		{ yyerror("invalid for statement"); yyerrok; }
@@ -461,21 +458,11 @@ name
 void yyerror(const char *msg)
 {
 	printf("Line %d, char: %d, %s at \"%s\"\n", tokenLine, tokenChar, msg, yytext);
-	syntaxErrorCount++;
-	syntaxErrorReported = 1;
 }
 
 int main(void)
 {
 	enter_scope();
-	if (yyparse() == 0) {
-		if (syntaxErrorCount == 0 && semanticErrorCount == 0) {
-			printf("Parsing completed successfully.\n");
-		} else {
-			printf("Parsing completed with %d syntax error(s) and %d semantic error(s).\n",
-			       syntaxErrorCount, semanticErrorCount);
-		}
-	}
 	while (scopeStack != NULL) {
 		leave_scope();
 	}
