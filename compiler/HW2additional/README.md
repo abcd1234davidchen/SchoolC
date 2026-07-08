@@ -1,22 +1,27 @@
 # Compiler Homework 2: Parser
+
 by: B123245006陳展皝
 
 ## System info:
-Lex version: flex 2.6.4
-Yacc version: bison (GNU Bison) 2.3
+
+Lex version: flex 2.6.4  
+Yacc version: bison (GNU Bison) 2.3  
 Operating Platform: macOS 26.5
 
 ## Executing Method:
+
 Install:
+
 - macOS: brew install flex
-- Linux: sudo apt-get install flex bison
+- Linux: sudo apt-get install flex bison  
 Compile:
 - macOS: make mac
-- Linux: make
+- Linux: make  
 Run:
-- ./scanner < TEST_FILE.java
+- ./parser < TEST_FILE.java
 
 ## Handle Issues in this specification:
+
 1. New .l file was modified from the previous homework to work with the new .y file.
 2. The scope and symbol table management was implemented to handle variable declarations and references, including nested scopes and unused variable warnings. This involved creating a stack of Scope structs to represent the current scope and its parent scopes, and a linked list of Symbol structs to represent the identifiers declared in each scope. The parser was modified to call the appropriate functions for managing the symbol table when entering and leaving scopes, declaring identifiers, and marking identifiers as used when they are referenced in the code.
 3. Classes are implemented with fields and methods. The parser can handle class declarations, including the syntax for declaring fields and methods, and manage the symbol table for class members. The fields are treated as variables declared in the class scope. The parser also handles the syntax for method declarations, including the parameter list and method body, and manages the symbol table for method parameters and local variables.
@@ -28,9 +33,11 @@ Run:
 9. AI and internet is used to help understanding the specification and providing suggestions for implementation
 
 ## Problems encountered while writing this assignment:
+
 1. Handling error was tricky, especially for syntax errors and redeclarations. I had to carefully check the conditions ensure proper error reporting.
 2. yyerror and yyerrok were used to handle syntax errors in if and for statements. I had to make sure to call yyerrok after reporting the error to prevent cascading errors.
 3. yacc shows shift/reduce conflicts for multiple statements. I had to use precedence rules to resolve these conflicts and ensure the correct parsing of statements.
 
 ## Results of executing all of test files:
+
 ![screenshot](/compiler/HW2/screenshot.png)

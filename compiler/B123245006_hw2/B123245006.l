@@ -12,6 +12,7 @@ int tokenChar = 1;
 static char lineBuffer[8192];
 static int lineBufferLen = 0;
 
+// Helper functions to manage line and character counts, and to build the line buffer for error reporting.
 static void advance_location(const char *text, int length)
 {
 	for (int i = 0; i < length; i++) {
@@ -24,6 +25,7 @@ static void advance_location(const char *text, int length)
 	}
 }
 
+// Append text to the line buffer, ensuring we don't overflow it.
 static void append_to_line(const char *text, int length)
 {
 	for (int i = 0; i < length; i++) {
@@ -33,6 +35,7 @@ static void append_to_line(const char *text, int length)
 	}
 }
 
+// Emit the current line buffer and reset it for the next line.
 static void emit_line(void)
 {
 	lineBuffer[lineBufferLen] = '\0';
@@ -40,12 +43,14 @@ static void emit_line(void)
 	lineBufferLen = 0;
 }
 
+// Mark the current token's starting line and character position for error reporting.
 static void mark_token(void)
 {
 	tokenLine = lineCount;
 	tokenChar = charCount;
 }
 
+// Consume the current text and update the line buffer and location accordingly.
 static void consume_text(void)
 {
 	append_to_line(yytext, yyleng);
