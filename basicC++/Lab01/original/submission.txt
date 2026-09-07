@@ -1,0 +1,20 @@
+第一題：
+#include <iostream>
+using namespace std;
+int main()
+{
+cout << "Hung-Pin Wen" << endl;
+return 0;
+}
+第二題：
+#include <iostream>
+using namespace std;
+int main()
+{
+cout << "*" << endl;
+cout << "**" << endl;
+cout << "***" << endl;
+cout << "****" << endl;
+cout << "*****" << endl;
+return 0;
+}
