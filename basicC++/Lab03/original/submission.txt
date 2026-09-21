@@ -1,0 +1,51 @@
+成績：
+第一題：
+#include <iostream>
+#include <fstream>
+using namespace std;
+int main()
+{
+int recA1,recA2;
+int recB1,recB2;
+int recC1,recC2;
+ifstream iff;
+iff.open("data.txt");
+iff>>recA1>>recA2;
+iff.clear();
+iff>>recB1>>recB2;
+iff.clear();
+iff>>recC1>>recC2;
+cout<<"Area: "<<recA1*recA2<<" Perimeter: "<<(recA1+recA2)*2<<endl;
+cout<<"Area: "<<recB1*recB2<<" Perimeter: "<<(recB1+recB2)*2<<endl;
+cout<<"Area: "<<recC1*recC2<<" Perimeter: "<<(recC1+recC2)*2<<endl;
+}
+第二題：
+#include <iostream>
+#include <string>
+#include <iomanip>
+using namespace std;
+int main()
+{
+string name;
+char classNo;
+int year;
+double GPA;
+getline(cin,name);
+cin.clear();
+cin>>classNo;
+cin.clear();
+cin>>year;
+cin.clear();
+cin>>GPA;
+cout<<left<<setw(20)<<"Name"
+<<right<<setw(6)<<"Class"
+<<right<<setw(10)<<"Year"
+<<right<<setw(12)<<"GPA"
+<<endl;
+cout<<left<<setw(20)<<name
+<<right<<setw(6)<<classNo
+<<right<<setw(10)<<year
+<<fixed<<setprecision(2)
+<<right<<setw(12)<<GPA
+<<endl;
+}
