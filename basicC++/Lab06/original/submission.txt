@@ -1,0 +1,56 @@
+成績：
+第一題:
+#include <iostream>
+#include <cmath>
+using namespace std;
+int main()
+{
+// define and read n
+int n;
+cin >> n;
+// calculate the coordinate of center cell
+// 0-based indices are used here: 0, 1, ..., n - 1
+int middle = (n - 1) / 2;
+// output the Manhattan distance of each cell in a nested loop
+for (int i = 0; i < n; i++)
+{
+for (int j = 0; j < n; j++)
+{
+int distance = abs(i - middle) + abs(j - middle);
+cout << distance;
+if (j != n - 1)
+cout << " ";
+}
+cout << endl;
+}
+return 0;
+}
+第二題:
+#include <iostream>
+#include <iomanip>
+using namespace std;
+int main()
+{
+// define and read N
+int N;
+cin >> N;
+// repeatedly read N match results in a loop statement
+int numWin = 0;
+int numLoss = 0;
+char currMatch;
+for (int i = 0; i < N; i++)
+{
+cin >> currMatch;
+if (currMatch == 'W')
+numWin++;
+else if (currMatch == 'L')
+numLoss++;
+}
+// calculate the win rate, don’t forget about type casting
+double winrate = numWin * 1.0 / (numWin + numLoss) * 100;
+// format output and display
+cout << "Wins: " << numWin << endl;
+cout << "Losses: " << numLoss << endl;
+cout << "Win Rate: " << fixed << setprecision(2) << winrate << "%" << endl;
+return 0;
+}
