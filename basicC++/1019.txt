@@ -1,0 +1,139 @@
+第一題:
+#include <iostream>
+#include <cstdlib>
+#include <string>
+#include <fstream>
+
+using namespace std;
+
+int pot_num(string in, int pot_now)
+{
+    int pot_new = pot_now;
+
+    if (in == "raise")
+    {
+        pot_new *= 2;
+    }
+    else if (in == "call")
+    {
+        pot_new += 0;
+    }
+    else if (in == "fold")
+    {
+        pot_new = 0;
+    }
+
+    return pot_new;
+}
+
+int card_num()
+{
+    return rand() % 13 + 1;
+}
+
+string card_flower()
+{
+    int flower = rand() % 4;
+    switch (flower)
+    {
+    case 0:
+        return "spade";
+    case 1:
+        return "heart";
+    case 2:
+        return "diamond";
+    case 3:
+        return "club";
+    }
+    return "error";
+}
+
+void dealer(int round)
+{
+    if (round == 0)
+    {
+        cout << card_flower() << " " << card_num() << endl;
+        cout << card_flower() << " " << card_num() << endl;
+    }
+    else if (round == 1)
+    {
+        cout << card_flower() << " " << card_num() << endl;
+        cout << card_flower() << " " << card_num() << endl;
+        cout << card_flower() << " " << card_num() << endl;
+    }
+    else if (round == 2)
+    {
+        cout << card_flower() << " " << card_num() << endl;
+    }
+    else if (round == 3)
+    {
+        cout << card_flower() << " " << card_num() << endl;
+    }
+}
+
+int main()
+{
+    srand(0);
+
+    string in;
+    
+    ifstream file;
+    
+    for (int i = 0; i < 2; i++)
+    {   
+        int pot = 10;
+        if (i == 0)
+        {
+            file.open("input1.txt");
+        }
+        else
+        {
+            file.open("input2.txt");
+        }
+        
+        for (int round = 0; round < 4; round++)
+        {
+            dealer(round);
+            file >> in;
+            pot = pot_num(in, pot);
+            if (in == "fold")
+            {
+                cout << "you fold" << endl;
+                break;
+            }
+            else
+            {
+                cout << "pot: " << pot << endl;
+            }
+        }
+        cout << "total pot: " << pot << endl;
+        file.close();
+    }
+
+    return 0;
+}
+第二題:
+#include <iostream>
+#include <fstream>
+
+using namespace std;
+
+int comb(int n, int k)
+{
+    if (k == 0 || k == n)
+        return 1;
+    else
+        return comb(n - 1, k - 1) + comb(n - 1, k);
+}
+
+int main()
+{
+    int n, k;
+    ifstream file("input3.txt");
+    for (int i = 0; i < 5; i++)
+    {
+        file >> n >> k;
+        cout << comb(n, k) << endl;
+    }
+    return 0;
+}
